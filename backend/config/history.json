@@ -1,0 +1,21 @@
+{
+  "_comment": "Mock history of expenses already reimbursed in earlier claims. The DuplicateDetector compares new expenses against these as well as the current claim.",
+  "expenses": [
+    {
+      "claimReference": "ER-2026-000874",
+      "merchant": "Konnect Mobile",
+      "invoiceNumber": "KM-BLR-2608-55102",
+      "expenseDate": "2026-08-05",
+      "total": 1179,
+      "currency": "INR"
+    },
+    {
+      "claimReference": "ER-2026-000874",
+      "merchant": "ZipCab",
+      "invoiceNumber": "ZC-7781-2208",
+      "expenseDate": "2026-08-22",
+      "total": 455,
+      "currency": "INR"
+    }
+  ]
+}

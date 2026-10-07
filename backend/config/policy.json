@@ -1,0 +1,114 @@
+{
+  "name": "Demo India Corp — Travel & Expense Policy v2026.1",
+  "currency": "INR",
+  "confidenceThresholds": {
+    "autoAccept": 0.9,
+    "review": 0.7
+  },
+  "duplicateThreshold": 0.75,
+  "general": {
+    "alwaysRequired": ["merchant", "expenseDate", "total", "currency"],
+    "staleAfterDays": 60,
+    "receiptRequiredAbove": 300,
+    "futureDatedInvalid": true,
+    "nonPositiveInvalid": true,
+    "warningsBlockSubmission": false
+  },
+  "overLimit": {
+    "allowCap": true,
+    "allowJustification": true
+  },
+  "categories": {
+    "AIR_TRAVEL": {
+      "label": "Air Travel",
+      "limit": null,
+      "requiredFields": ["travelDate", "businessPurpose"],
+      "invoiceRequired": true,
+      "inheritTripPurpose": true
+    },
+    "TRAIN_TRAVEL": {
+      "label": "Train Travel",
+      "limit": null,
+      "requiredFields": ["travelDate", "businessPurpose"],
+      "invoiceRequired": true,
+      "inheritTripPurpose": true
+    },
+    "TAXI": {
+      "label": "Taxi / Cab",
+      "limit": { "amount": 3000, "per": "day" },
+      "requiredFields": ["businessPurpose"],
+      "recommendedFields": ["origin", "destination"],
+      "receiptRequiredAbove": 500,
+      "inheritTripPurpose": true
+    },
+    "LOCAL_TRANSPORT": {
+      "label": "Local Transport",
+      "limit": { "amount": 1000, "per": "day" },
+      "requiredFields": ["businessPurpose"],
+      "inheritTripPurpose": true
+    },
+    "HOTEL": {
+      "label": "Hotel / Accommodation",
+      "limit": { "amount": 7500, "per": "night" },
+      "requiredFields": ["checkIn", "checkOut", "businessPurpose"],
+      "invoiceRequired": true,
+      "inheritTripPurpose": true
+    },
+    "MEALS": {
+      "label": "Meals",
+      "limit": { "amount": 1500, "per": "day" },
+      "requiredFields": ["businessPurpose"],
+      "inheritTripPurpose": true,
+      "inheritPurposeMaxAmount": 1000,
+      "inheritPurposeMaxCovers": 2
+    },
+    "CLIENT_ENTERTAINMENT": {
+      "label": "Client Entertainment",
+      "limit": { "amount": 5000, "per": "event" },
+      "requiredFields": ["businessPurpose", "attendees"]
+    },
+    "FUEL": {
+      "label": "Fuel",
+      "limit": { "amount": 5000, "per": "month" },
+      "requiredFields": []
+    },
+    "PARKING": {
+      "label": "Parking",
+      "limit": { "amount": 500, "per": "day" },
+      "requiredFields": [],
+      "inheritTripPurpose": true
+    },
+    "TOLL": {
+      "label": "Toll",
+      "limit": { "amount": 1000, "per": "day" },
+      "requiredFields": []
+    },
+    "MOBILE_INTERNET": {
+      "label": "Mobile / Internet",
+      "limit": { "amount": 1500, "per": "month" },
+      "requiredFields": [],
+      "invoiceRequired": true
+    },
+    "OFFICE_SUPPLIES": {
+      "label": "Office Supplies",
+      "limit": { "amount": 5000, "per": "item" },
+      "requiredFields": ["businessPurpose"],
+      "inheritTripPurpose": true
+    },
+    "TRAINING_CONFERENCE": {
+      "label": "Training / Conference",
+      "limit": null,
+      "requiredFields": ["businessPurpose"]
+    },
+    "SOFTWARE_SUBSCRIPTION": {
+      "label": "Software / Subscription",
+      "limit": { "amount": 3000, "per": "month" },
+      "requiredFields": ["businessPurpose"]
+    },
+    "MISCELLANEOUS": {
+      "label": "Miscellaneous",
+      "limit": { "amount": 2000, "per": "item" },
+      "requiredFields": ["description"]
+    }
+  }
+}

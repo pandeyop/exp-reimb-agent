@@ -1,0 +1,70 @@
+{
+  "_comment": "Signals used by the offline ExpenseClassifier. Each signal is matched case-insensitively against merchant, document type, line items and receipt text. Weights are summed per category; the best category wins and its share of the total score drives confidence.",
+  "signals": {
+    "AIR_TRAVEL": {
+      "documentTypes": ["air_ticket", "flight_invoice"],
+      "keywords": { "pnr": 3, "flight": 3, "airlines": 3, "boarding": 2, "sector": 2, "fare": 1, "baggage": 1, "airport": 0.5 },
+      "reason": "the document is an airline invoice with a PNR, flight number and sector"
+    },
+    "TRAIN_TRAVEL": {
+      "documentTypes": ["train_ticket"],
+      "keywords": { "irctc": 4, "train": 3, "coach": 2, "berth": 2, "railway": 3 },
+      "reason": "the document is a rail ticket with train and coach details"
+    },
+    "TAXI": {
+      "documentTypes": ["ride_receipt", "taxi_receipt"],
+      "keywords": { "trip": 2, "ride": 2, "cab": 3, "pickup": 2, "drop": 2, "driver": 2, "uber": 4, "ola": 4, "zipcab": 4, "ridenow": 4, "km": 1 },
+      "reason": "the receipt is from a ride-hailing service and shows pickup and drop locations"
+    },
+    "HOTEL": {
+      "documentTypes": ["hotel_invoice", "hotel_folio"],
+      "keywords": { "room": 2, "check-in": 3, "check-out": 3, "folio": 3, "night": 2, "hotel": 3, "guest": 1, "tariff": 2 },
+      "reason": "the invoice is issued by a hotel and contains room-night charges"
+    },
+    "MEALS": {
+      "documentTypes": ["restaurant_bill", "cafe_receipt"],
+      "keywords": { "restaurant": 3, "cafe": 3, "coffee": 2, "latte": 2, "meal": 2, "thali": 2, "dosa": 2, "food": 1, "table": 1, "covers": 1, "brewpub": 2, "kitchen": 1 },
+      "reason": "the receipt is from a restaurant or café and lists food and beverage items"
+    },
+    "FUEL": {
+      "documentTypes": ["fuel_receipt"],
+      "keywords": { "petrol": 4, "diesel": 4, "fuel": 3, "litre": 2, "pump": 2 },
+      "reason": "the receipt is from a fuel station and lists litres dispensed"
+    },
+    "PARKING": {
+      "documentTypes": ["parking_slip"],
+      "keywords": { "parking": 4, "vehicle no": 2, "entry": 1, "exit": 1, "slot": 1 },
+      "reason": "the slip is a parking ticket with vehicle entry details"
+    },
+    "TOLL": {
+      "documentTypes": ["toll_receipt"],
+      "keywords": { "toll": 4, "fastag": 3, "plaza": 2 },
+      "reason": "the receipt is from a toll plaza"
+    },
+    "MOBILE_INTERNET": {
+      "documentTypes": ["telecom_bill"],
+      "keywords": { "postpaid": 4, "broadband": 4, "mobile": 2, "data usage": 2, "bill period": 2, "plan": 1 },
+      "reason": "the document is a telecom bill with a billing period and plan charges"
+    },
+    "OFFICE_SUPPLIES": {
+      "documentTypes": ["retail_invoice"],
+      "keywords": { "stationers": 4, "stationery": 4, "clicker": 3, "presenter": 2, "cable": 1, "pen": 1, "notebook": 1, "adapter": 2 },
+      "reason": "the invoice is from a stationery/electronics retailer for work equipment"
+    },
+    "TRAINING_CONFERENCE": {
+      "documentTypes": ["conference_invoice"],
+      "keywords": { "conference": 4, "summit": 4, "workshop": 3, "registration": 2, "training": 3, "delegate": 2 },
+      "reason": "the invoice is a conference or training registration"
+    },
+    "SOFTWARE_SUBSCRIPTION": {
+      "documentTypes": ["saas_invoice"],
+      "keywords": { "subscription": 4, "license": 3, "saas": 4, "per seat": 3, "annual plan": 2 },
+      "reason": "the invoice is for a software licence or subscription"
+    },
+    "LOCAL_TRANSPORT": {
+      "documentTypes": ["metro_ticket", "bus_ticket"],
+      "keywords": { "metro": 4, "bus": 3, "auto": 2, "rickshaw": 3 },
+      "reason": "the ticket is for local public transport"
+    }
+  }
+}

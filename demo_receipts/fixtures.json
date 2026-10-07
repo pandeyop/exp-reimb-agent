@@ -1,0 +1,1669 @@
+{
+ "_comment": "Recorded extractions replayed in offline mode, keyed by file SHA-256. Regenerate with scripts/generate_demo_receipts.py.",
+ "documents": {
+  "72255af23345fa411298ca31db1d718f770817f867d318af603123c7caa567be": {
+   "filename": "01_airvista_flight_invoice.pdf",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "air_ticket",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "AirVista Airlines",
+      "confidence": 0.98
+     },
+     "invoiceNumber": {
+      "value": "AV-INV-2609-118742",
+      "confidence": 0.97
+     },
+     "expenseDate": {
+      "value": "2026-09-21",
+      "confidence": 0.93
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.99
+     },
+     "subtotal": {
+      "value": "10756.00",
+      "confidence": 0.9
+     },
+     "tax": {
+      "value": "484.00",
+      "confidence": 0.95
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "11240.00",
+      "confidence": 0.99
+     },
+     "merchantAddress": {
+      "value": "Aerocity, New Delhi 110037",
+      "confidence": 0.92
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.9
+     },
+     "gstin": {
+      "value": "07AAVCA4417K1Z3",
+      "confidence": 0.96
+     },
+     "paymentMethod": {
+      "value": "Corporate card",
+      "confidence": 0.93
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.95
+     },
+     "bookingReference": {
+      "value": "K7QX2M",
+      "confidence": 0.98
+     },
+     "origin": {
+      "value": "Delhi (DEL)",
+      "confidence": 0.97
+     },
+     "destination": {
+      "value": "Bengaluru (BLR)",
+      "confidence": 0.97
+     },
+     "travelDate": {
+      "value": "2026-09-21",
+      "confidence": 0.97
+     },
+     "returnDate": {
+      "value": "2026-09-24",
+      "confidence": 0.96
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": "Customer meetings - Northwind Retail contract renewal",
+      "confidence": 0.95
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Return flight DEL-BLR-DEL, AV 512 / AV 517",
+      "confidence": 0.9
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Base fare (2 sectors)",
+      "quantity": 1,
+      "unitPrice": 9780,
+      "amount": 9780
+     },
+     {
+      "description": "Airport & user development fees",
+      "quantity": 1,
+      "unitPrice": 776,
+      "amount": 776
+     },
+     {
+      "description": "Convenience fee",
+      "quantity": 1,
+      "unitPrice": 200,
+      "amount": 200
+     },
+     {
+      "description": "IGST @ 5%",
+      "quantity": 1,
+      "unitPrice": 484,
+      "amount": 484
+     }
+    ],
+    "categorySuggestion": {
+     "category": "AIR_TRAVEL",
+     "confidence": 0.98,
+     "reason": "Airline tax invoice with a PNR, flight numbers and DEL-BLR sectors."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "a416031a7f5ba258ff3a51f777821e83c97d98a3935cb4304d1e40acfbd86b2c": {
+   "filename": "02_orchid_grand_hotel_folio.pdf",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "hotel_invoice",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "The Orchid Grand",
+      "confidence": 0.97
+     },
+     "invoiceNumber": {
+      "value": "OGW/26-27/04418",
+      "confidence": 0.96
+     },
+     "expenseDate": {
+      "value": "2026-09-24",
+      "confidence": 0.92
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.99
+     },
+     "subtotal": {
+      "value": "23400.00",
+      "confidence": 0.96
+     },
+     "tax": {
+      "value": "1170.00",
+      "confidence": 0.95
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "24570.00",
+      "confidence": 0.98
+     },
+     "merchantAddress": {
+      "value": "14 ITPL Main Road, Whitefield, Bengaluru 560066",
+      "confidence": 0.95
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.96
+     },
+     "gstin": {
+      "value": "29AAKFO8812M1Z5",
+      "confidence": 0.95
+     },
+     "paymentMethod": {
+      "value": "Visa card",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": "9031",
+      "confidence": 0.93
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": "2026-09-21",
+      "confidence": 0.97
+     },
+     "checkOut": {
+      "value": "2026-09-24",
+      "confidence": 0.97
+     },
+     "nights": {
+      "value": "3",
+      "confidence": 0.98
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "3 nights, Deluxe King room 614",
+      "confidence": 0.9
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Room tariff - Deluxe King",
+      "quantity": 3,
+      "unitPrice": 7800,
+      "amount": 23400
+     },
+     {
+      "description": "CGST 2.5%",
+      "quantity": 1,
+      "unitPrice": 585,
+      "amount": 585
+     },
+     {
+      "description": "SGST 2.5%",
+      "quantity": 1,
+      "unitPrice": 585,
+      "amount": 585
+     }
+    ],
+    "categorySuggestion": {
+     "category": "HOTEL",
+     "confidence": 0.98,
+     "reason": "Issued by a hotel and contains room-night charges for 3 nights."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "e2459f989082d3e76480197dd7d210efa8171e18854a329cafe5b5705dbf67db": {
+   "filename": "03_zipcab_airport_ride_rotated.jpg",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "ride_receipt",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "ZipCab",
+      "confidence": 0.96
+     },
+     "invoiceNumber": {
+      "value": "ZC-4471-2109",
+      "confidence": 0.93
+     },
+     "expenseDate": {
+      "value": "2026-09-21",
+      "confidence": 0.94
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.97
+     },
+     "subtotal": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tax": {
+      "value": "37.00",
+      "confidence": 0.9
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "786.00",
+      "confidence": 0.96
+     },
+     "merchantAddress": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.9
+     },
+     "gstin": {
+      "value": "29AAJCZ5521Q1Z8",
+      "confidence": 0.88
+     },
+     "paymentMethod": {
+      "value": "Corporate card",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.92
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": "Kempegowda Intl Airport T1",
+      "confidence": 0.93
+     },
+     "destination": {
+      "value": "The Orchid Grand, Whitefield",
+      "confidence": 0.93
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Airport to hotel",
+      "confidence": 0.85
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Ride fare",
+      "quantity": 1,
+      "unitPrice": 712,
+      "amount": 712
+     },
+     {
+      "description": "Airport toll & parking",
+      "quantity": 1,
+      "unitPrice": 37,
+      "amount": 37
+     },
+     {
+      "description": "GST 5%",
+      "quantity": 1,
+      "unitPrice": 37,
+      "amount": 37
+     }
+    ],
+    "categorySuggestion": {
+     "category": "TAXI",
+     "confidence": 0.95,
+     "reason": "Ride-hailing receipt with pickup at the airport and drop at a hotel."
+    },
+    "multipleTotalsFound": false,
+    "notes": [
+     "Image was rotated 90 degrees; read after re-orienting."
+    ]
+   }
+  },
+  "3ffc1b315214ece7c4082df74dfe626d1aa28619b7596863fb49b799200fc769": {
+   "filename": "04_bean_street_coffee_blurry.jpg",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "cafe_receipt",
+    "readability": "fair",
+    "fields": {
+     "merchant": {
+      "value": "Bean Street Coffee",
+      "confidence": 0.86
+     },
+     "invoiceNumber": {
+      "value": "BSC/2309/0412",
+      "confidence": 0.72
+     },
+     "expenseDate": {
+      "value": "2026-09-23",
+      "confidence": 0.78
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.95
+     },
+     "subtotal": {
+      "value": "400.00",
+      "confidence": 0.8
+     },
+     "tax": {
+      "value": "20.00",
+      "confidence": 0.75
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "420.00",
+      "confidence": 0.92
+     },
+     "merchantAddress": {
+      "value": "Brigade Road, Bengaluru",
+      "confidence": 0.8
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.85
+     },
+     "gstin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "paymentMethod": {
+      "value": "UPI",
+      "confidence": 0.8
+     },
+     "cardLast4": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": "1",
+      "confidence": 0.6
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Coffee and croissant",
+      "confidence": 0.8
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Cappuccino (L)",
+      "quantity": 1,
+      "unitPrice": 220,
+      "amount": 220
+     },
+     {
+      "description": "Almond croissant",
+      "quantity": 1,
+      "unitPrice": 180,
+      "amount": 180
+     }
+    ],
+    "categorySuggestion": {
+     "category": "MEALS",
+     "confidence": 0.93,
+     "reason": "Café receipt listing a coffee and a pastry."
+    },
+    "multipleTotalsFound": false,
+    "notes": [
+     "Image is blurred; date digits partly soft."
+    ]
+   }
+  },
+  "57360d2aaf4981693a2be46e26a76dd5f138cb14f1814dd66dc1dd60dd414535": {
+   "filename": "05_hops_and_barrels_dinner_photo.jpg",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "restaurant_bill",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "Hops & Barrels",
+      "confidence": 0.95
+     },
+     "invoiceNumber": {
+      "value": "HB-22091-0387",
+      "confidence": 0.9
+     },
+     "expenseDate": {
+      "value": "2026-09-22",
+      "confidence": 0.93
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.97
+     },
+     "subtotal": {
+      "value": "1760.00",
+      "confidence": 0.92
+     },
+     "tax": {
+      "value": "88.00",
+      "confidence": 0.9
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "1850.00",
+      "confidence": 0.95
+     },
+     "merchantAddress": {
+      "value": "EPIP Zone, Whitefield, Bengaluru",
+      "confidence": 0.9
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.92
+     },
+     "gstin": {
+      "value": "29AAHFH2290B1Z7",
+      "confidence": 0.86
+     },
+     "paymentMethod": {
+      "value": "Card",
+      "confidence": 0.88
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.9
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": "4",
+      "confidence": 0.9
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Dinner for 4",
+      "confidence": 0.85
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Paneer tikka platter",
+      "quantity": 2,
+      "unitPrice": 320,
+      "amount": 640
+     },
+     {
+      "description": "Lamb biryani",
+      "quantity": 1,
+      "unitPrice": 420,
+      "amount": 420
+     },
+     {
+      "description": "Veg thai curry bowl",
+      "quantity": 2,
+      "unitPrice": 280,
+      "amount": 560
+     },
+     {
+      "description": "Fresh lime soda",
+      "quantity": 4,
+      "unitPrice": 35,
+      "amount": 140
+     }
+    ],
+    "categorySuggestion": {
+     "category": "MEALS",
+     "confidence": 0.93,
+     "reason": "Restaurant bill listing food and drinks for 4 covers."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "b01abe625df2a2f494456355d705a04529a7839e32bfb6078c2733c428cd2d49": {
+   "filename": "06_ridenow_trip_receipt.pdf",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "ride_receipt",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "RideNow",
+      "confidence": 0.97
+     },
+     "invoiceNumber": {
+      "value": "RN-88214-0922",
+      "confidence": 0.96
+     },
+     "expenseDate": {
+      "value": "2026-09-22",
+      "confidence": 0.97
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.99
+     },
+     "subtotal": {
+      "value": "611.43",
+      "confidence": 0.95
+     },
+     "tax": {
+      "value": "30.57",
+      "confidence": 0.95
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "642.00",
+      "confidence": 0.99
+     },
+     "merchantAddress": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.9
+     },
+     "gstin": {
+      "value": "29AAGCR7733L1Z2",
+      "confidence": 0.95
+     },
+     "paymentMethod": {
+      "value": "Corporate card",
+      "confidence": 0.95
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.97
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": "The Orchid Grand, Whitefield",
+      "confidence": 0.96
+     },
+     "destination": {
+      "value": "Northwind Retail HQ, Tech Park One, Whitefield",
+      "confidence": 0.96
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Hotel to customer office",
+      "confidence": 0.88
+     }
+    },
+    "lineItems": [],
+    "categorySuggestion": {
+     "category": "TAXI",
+     "confidence": 0.97,
+     "reason": "Ride-hailing receipt with pickup and drop locations."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "44a0a685cfffbc0acdae8fab9f164b9c52d07710281d76f8a54a3857f04c8db0": {
+   "filename": "07_zipcab_receipt_email_copy.pdf",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "ride_receipt",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "ZipCab",
+      "confidence": 0.98
+     },
+     "invoiceNumber": {
+      "value": "ZC-4471-2109",
+      "confidence": 0.98
+     },
+     "expenseDate": {
+      "value": "2026-09-21",
+      "confidence": 0.98
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.97
+     },
+     "subtotal": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tax": {
+      "value": "37.00",
+      "confidence": 0.9
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "786.00",
+      "confidence": 0.99
+     },
+     "merchantAddress": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.9
+     },
+     "gstin": {
+      "value": "29AAJCZ5521Q1Z8",
+      "confidence": 0.88
+     },
+     "paymentMethod": {
+      "value": "Corporate card",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.92
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": "Kempegowda Intl Airport T1",
+      "confidence": 0.93
+     },
+     "destination": {
+      "value": "The Orchid Grand, Whitefield",
+      "confidence": 0.93
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Airport to hotel",
+      "confidence": 0.85
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Ride fare",
+      "quantity": 1,
+      "unitPrice": 712,
+      "amount": 712
+     },
+     {
+      "description": "Airport toll & parking",
+      "quantity": 1,
+      "unitPrice": 37,
+      "amount": 37
+     },
+     {
+      "description": "GST 5%",
+      "quantity": 1,
+      "unitPrice": 37,
+      "amount": 37
+     }
+    ],
+    "categorySuggestion": {
+     "category": "TAXI",
+     "confidence": 0.97,
+     "reason": "Ride-hailing receipt with pickup and drop locations."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "e3e7b1b00195cc5fde9af64a473b15f85533c22549202b96287cb352c34f3548": {
+   "filename": "08_techpark_parking_slip.jpg",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "parking_slip",
+    "readability": "fair",
+    "fields": {
+     "merchant": {
+      "value": "Tech Park One Visitor Parking",
+      "confidence": 0.93
+     },
+     "invoiceNumber": {
+      "value": "P-B2-30917",
+      "confidence": 0.88
+     },
+     "expenseDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.95
+     },
+     "subtotal": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tax": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "150.00",
+      "confidence": 0.94
+     },
+     "merchantAddress": {
+      "value": "Whitefield, Bengaluru",
+      "confidence": 0.9
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.88
+     },
+     "gstin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "paymentMethod": {
+      "value": "Cash",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Visitor parking, 09:31-18:05",
+      "confidence": 0.85
+     }
+    },
+    "lineItems": [],
+    "categorySuggestion": {
+     "category": "PARKING",
+     "confidence": 0.96,
+     "reason": "Parking ticket with vehicle entry and exit times."
+    },
+    "multipleTotalsFound": false,
+    "notes": [
+     "The date on the slip is covered by an ink smudge and cannot be read."
+    ]
+   }
+  },
+  "10c30761f6cbfb867a252180bfed67111a6dffb4fdb85ad68555f18c04b04ad6": {
+   "filename": "09_ridenow_airport_drop_screenshot.png",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "ride_receipt",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "RideNow",
+      "confidence": 0.97
+     },
+     "invoiceNumber": {
+      "value": "RN-90551-0924",
+      "confidence": 0.94
+     },
+     "expenseDate": {
+      "value": "2026-09-24",
+      "confidence": 0.96
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.98
+     },
+     "subtotal": {
+      "value": "866.67",
+      "confidence": 0.93
+     },
+     "tax": {
+      "value": "43.33",
+      "confidence": 0.93
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "910.00",
+      "confidence": 0.98
+     },
+     "merchantAddress": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.9
+     },
+     "gstin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "paymentMethod": {
+      "value": "Corporate card",
+      "confidence": 0.93
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.95
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": "The Orchid Grand, Whitefield",
+      "confidence": 0.95
+     },
+     "destination": {
+      "value": "Kempegowda Intl Airport T1",
+      "confidence": 0.95
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Hotel to airport",
+      "confidence": 0.88
+     }
+    },
+    "lineItems": [],
+    "categorySuggestion": {
+     "category": "TAXI",
+     "confidence": 0.97,
+     "reason": "Ride-hailing app receipt with pickup and drop locations."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "9970b261c17fbbe4d6fac24e4d72d8c68935b5d4b585bd2d22e18211abd5b609": {
+   "filename": "10_udupi_upahar_lunch.jpg",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "restaurant_bill",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "Udupi Upahar",
+      "confidence": 0.95
+     },
+     "invoiceNumber": {
+      "value": "UU-7730",
+      "confidence": 0.9
+     },
+     "expenseDate": {
+      "value": "2026-09-23",
+      "confidence": 0.94
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.97
+     },
+     "subtotal": {
+      "value": "362.00",
+      "confidence": 0.9
+     },
+     "tax": {
+      "value": "18.00",
+      "confidence": 0.9
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "380.00",
+      "confidence": 0.96
+     },
+     "merchantAddress": {
+      "value": "ITPL Road, Whitefield, Bengaluru",
+      "confidence": 0.9
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.92
+     },
+     "gstin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "paymentMethod": {
+      "value": "UPI",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": "1",
+      "confidence": 0.92
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Lunch",
+      "confidence": 0.85
+     }
+    },
+    "lineItems": [
+     {
+      "description": "South Indian thali",
+      "quantity": 1,
+      "unitPrice": 290,
+      "amount": 290
+     },
+     {
+      "description": "Filter coffee",
+      "quantity": 1,
+      "unitPrice": 72,
+      "amount": 72
+     }
+    ],
+    "categorySuggestion": {
+     "category": "MEALS",
+     "confidence": 0.95,
+     "reason": "Restaurant bill for a single thali lunch."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "c8f9ae9a33cd61baf5c6ec9313f2693ce0fee5a80401e06b65f66b2f44cf8d62": {
+   "filename": "11_konnect_mobile_bill_aug.pdf",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "telecom_bill",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "Konnect Mobile",
+      "confidence": 0.97
+     },
+     "invoiceNumber": {
+      "value": "KM-BLR-2609-60417",
+      "confidence": 0.96
+     },
+     "expenseDate": {
+      "value": "2026-09-05",
+      "confidence": 0.95
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.99
+     },
+     "subtotal": {
+      "value": "999.00",
+      "confidence": 0.96
+     },
+     "tax": {
+      "value": "179.82",
+      "confidence": 0.94
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "1179.00",
+      "confidence": 0.98
+     },
+     "merchantAddress": {
+      "value": "Koramangala, Bengaluru 560034",
+      "confidence": 0.9
+     },
+     "city": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "gstin": {
+      "value": "29AACCK1180P1Z9",
+      "confidence": 0.95
+     },
+     "paymentMethod": {
+      "value": "Auto-debit",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": "01 Aug 2026 - 31 Aug 2026",
+      "confidence": 0.95
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Postpaid plan Business Unlimited 999 (August)",
+      "confidence": 0.9
+     }
+    },
+    "lineItems": [],
+    "categorySuggestion": {
+     "category": "MOBILE_INTERNET",
+     "confidence": 0.97,
+     "reason": "Telecom postpaid bill with a billing period and plan rental."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  },
+  "e456bd82a32e3f0937c74d7ca0c50056a4a2c5bf843fb229406eccf023571592": {
+   "filename": "12_city_stationers_scan.png",
+   "extraction": {
+    "isExpenseDocument": true,
+    "documentType": "retail_invoice",
+    "readability": "good",
+    "fields": {
+     "merchant": {
+      "value": "City Stationers & IT",
+      "confidence": 0.94
+     },
+     "invoiceNumber": {
+      "value": "CS/1452/26",
+      "confidence": 0.92
+     },
+     "expenseDate": {
+      "value": "2026-09-22",
+      "confidence": 0.93
+     },
+     "currency": {
+      "value": "INR",
+      "confidence": 0.97
+     },
+     "subtotal": {
+      "value": "1229.00",
+      "confidence": 0.9
+     },
+     "tax": {
+      "value": "221.22",
+      "confidence": 0.9
+     },
+     "serviceCharge": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "tip": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "total": {
+      "value": "1450.00",
+      "confidence": 0.96
+     },
+     "merchantAddress": {
+      "value": "Commercial Street, Bengaluru",
+      "confidence": 0.9
+     },
+     "city": {
+      "value": "Bengaluru",
+      "confidence": 0.92
+     },
+     "gstin": {
+      "value": "29AAEPC6634H1Z1",
+      "confidence": 0.9
+     },
+     "paymentMethod": {
+      "value": "Card",
+      "confidence": 0.9
+     },
+     "cardLast4": {
+      "value": "4417",
+      "confidence": 0.92
+     },
+     "bookingReference": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "origin": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "destination": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "travelDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "returnDate": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkIn": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "checkOut": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "nights": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "covers": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "billingPeriod": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "businessPurpose": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "attendees": {
+      "value": null,
+      "confidence": 0.0
+     },
+     "description": {
+      "value": "Wireless presenter and USB-C to HDMI adapter",
+      "confidence": 0.9
+     }
+    },
+    "lineItems": [
+     {
+      "description": "Wireless presenter/clicker",
+      "quantity": 1,
+      "unitPrice": 1099,
+      "amount": 1099
+     },
+     {
+      "description": "USB-C to HDMI adapter",
+      "quantity": 1,
+      "unitPrice": 130,
+      "amount": 130
+     }
+    ],
+    "categorySuggestion": {
+     "category": "OFFICE_SUPPLIES",
+     "confidence": 0.94,
+     "reason": "Retail tax invoice for a presentation clicker and display adapter."
+    },
+    "multipleTotalsFound": false,
+    "notes": []
+   }
+  }
+ }
+}
