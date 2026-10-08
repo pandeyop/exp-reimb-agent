@@ -2,6 +2,8 @@
 
 > **Drop your receipts. Answer only what the AI couldn't determine. Submit.**
 
+**Track:** AI Innovation Lab Season 2 — business case: Expense & Reimbursement Agent
+
 An AI-native expense assistant. It turns a pile of unstructured receipts (photos, scans, PDFs) into a validated, policy-checked reimbursement claim. The employee does as little work as possible.
 
 ![Processed claim](docs/screenshots/01-processed-claim.jpg)
@@ -28,54 +30,21 @@ The employee drops all their documents at once. The agent then:
 
 In the bundled demo, 12 documents produce 146 extracted fields and 19 inferred fields. The employee answers 3 questions and confirms 1 duplicate, so **98% of manual data entry is avoided**.
 
-## 3. Architecture
-
-```
-frontend/ (React + Vite)                 backend/ (FastAPI, Python 3.12)
-┌─────────────────────────┐   REST    ┌──────────────────────────────────────────────┐
-│ Receipts │ Claim │ Chat │ ───────▶ │ app/main.py          API + serves built UI    │
-│  drop    │ dash  │ cards│          │ app/agent/                                   │
-│  status  │ table │ input│          │   document_interpreter  Claude vision/PDF ⇄ offline │
-│ Drawer: receipt+fields  │          │   normaliser            validates AI output       │
-│ Review ▸ Submit ▸ Done  │          │   classifier            category + confidence + why│
-└─────────────────────────┘          │   enrich                inference + trip grouping  │
-                                     │   policy                PolicyEvaluator (JSON)     │
-                                     │   duplicates            DuplicateDetector          │
-                                     │   planner               MissingInfo + Clarification│
-                                     │   claim_manager         state machine, revalidate  │
-                                     │   chat_agent            Claude tool-use ⇄ rules    │
-                                     │   submission            SubmissionTool             │
-                                     │ app/mock_finance.py     mock corporate API         │
-                                     │ SQLite (data/)  ·  uploads (data/uploads, private) │
-                                     └──────────────────────────────────────────────┘
-```
-
-* **Persistence:** SQLite, with one JSON document per claim, document and expense, plus chat messages, events and mock submissions.
-* **Processing:** uploads return immediately. Documents are processed by a small thread pool, and the UI polls while documents are being processed. When the last document in an upload batch finishes, the agent posts a summary and its questions.
-* **Derived state is never stored as truth.** Every mutation runs `revalidate()`, which recomputes inferences, groups, policy results, duplicates, gaps, questions and statuses from the facts. Facts are what was extracted, what the user said and what the user decided.
-
-## 4. AI-agent design
+## 3. How it works
 
 ```
 INGEST → UNDERSTAND → EXTRACT → NORMALISE → CLASSIFY → INFER/GROUP → CHECK POLICY
       → CHECK DUPLICATES → IDENTIFY GAPS → ASK MINIMAL QUESTIONS → UPDATE → REVALIDATE → READY
 ```
 
-| Capability | Module | How |
-|---|---|---|
-| DocumentInterpreter | `agent/document_interpreter.py` | Claude (`claude-opus-5-5` by default) receives the image or PDF and must answer in a strict **JSON schema** (`output_config.format`). The schema has a value and confidence for every field, plus the document type, readability, line items, a category suggestion and a `multipleTotalsFound` flag. On failure it retries once, then falls back to offline mode. |
-| Validation | `agent/normaliser.py` | Every AI value is type-coerced (money, dates, currency codes) and range-checked. Unreadable values are dropped with a note. Card numbers are masked. Multiple totals lower the confidence. |
-| ExpenseClassifier | `agent/classifier.py` | Two independent signals are combined: the model's suggestion and a configurable evidence scorer (`config/categories.json`). When they agree, confidence goes up. When they disagree, confidence drops below the review threshold and the employee is asked to confirm. |
-| Inference & grouping | `agent/enrich.py` | Trips are anchored on flight and hotel bookings. A business purpose found on a booking is inherited by in-trip expenses at 0.8 confidence, marked *inferred* and explained. Inheritance is **deliberately blocked** for large or multi-cover meals ("could be client entertainment"). Nights are computed from check-in and check-out, and hotel invoice dates from check-out. |
-| PolicyEvaluator | `agent/policy.py` | Per-item, per-event, per-night, per-day and per-month limits. Required fields. Future dates and non-positive amounts are blocking. Stale dates, missing invoices, foreign currency and missing recommended fields are warnings. Every result is written in plain language: *Claimed ₹24,570 · Policy limit ₹22,500 (₹7,500/night × 3) · Excess ₹2,070*. |
-| DuplicateDetector | `agent/duplicates.py` | Weighted signals: same file hash, invoice number, amount, date, merchant similarity, perceptual image hash and route. Each pair gets a score and an explanation. Expenses are also compared with mock history (`config/history.json`). Nothing is removed without the employee's confirmation. |
-| MissingInformationDetector | `agent/planner.py` | Each field is classified as **KNOWN / INFERRED / LOW_CONFIDENCE / MISSING / NOT_REQUIRED** using configurable thresholds (≥0.90 accept, 0.70–0.89 inferred, <0.70 ask). |
-| ClarificationPlanner | `agent/planner.py` | It asks only when a field is required, missing or uncertain, and not inferable. Questions are consolidated: one per expense, and one per trip for a shared purpose. Each question carries quick-reply options built from context, such as the trip's days for a smudged date. Policy decisions wait until missing information is answered, because the answer can change the category and its limit. |
-| Conversational agent | `agent/chat_agent.py` | Quick replies are applied deterministically. Free text goes to **Claude tool use** with strict tools: `set_expense_fields`, `set_category`, `confirm_field`, `resolve_duplicate`, `resolve_over_limit`, `exclude_expense` and `rename_claim`. Updated claim state is fed back after each tool call. There is **no submit tool**. Without credentials, or if the call fails, a deterministic interpreter routes the answer to the best-fitting open question. It understands phrases like "client dinner with X and Y", "the 23rd", "Wednesday", "cap it" and "yes it's the same ride". |
-| ClaimManager | `agent/claim_manager.py` | Owns the expense statuses (`PROCESSING, COMPLETE, NEEDS_INFORMATION, WARNING, POLICY_VIOLATION, POSSIBLE_DUPLICATE, EXCLUDED`) and the claim statuses (`DRAFT, PROCESSING, ACTION_REQUIRED, READY_TO_SUBMIT, SUBMITTED`). Also handles edits, exclusions and replacement uploads, and builds the dashboard snapshot. |
-| SubmissionTool | `agent/submission.py` | Re-validates, requires `confirm: true`, builds the corporate payload and calls the mock finance API. A failure leaves the claim unchanged and READY. |
+* **Frontend:** React + Vite. Three panes (receipts, claim dashboard, assistant chat), an expense drawer with the original receipt beside its editable fields, and a review & submit flow. The production build is served by FastAPI.
+* **Backend:** FastAPI + SQLite. Agent capabilities live in separate modules under `backend/app/agent/`: document interpreter, normaliser, classifier, inference & grouping, policy evaluator, duplicate detector, clarification planner, claim manager, chat agent and submission tool.
+* **AI:** Claude reads each document into a strict JSON schema with a confidence for every field, and interprets free-text chat through tool use. There is no submit tool. Without an API key, the app replays recorded extractions for the demo receipts and uses a deterministic chat interpreter.
+* **Deterministic core:** validation, inference, policy limits, duplicate scoring and question planning are rule-based and configured in JSON, so every decision is explainable and repeatable. Every change re-runs `revalidate()`.
 
-**Explainability.** Every expense shows *why the agent decided this*: the classification reason, each inference and its source, missing-information reasons, the duplicate explanation and the policy reasoning. Each field shows a source badge (`Read 97%`, `Inferred 80%`, `You`).
+## 4. Design document
+
+**[docs/DESIGN.md](docs/DESIGN.md)** is the technical design. It covers architecture and sequence diagrams, the expense and claim state machines, chat routing, confidence thresholds and field states, policy limits (including how a daily or monthly excess is split between expenses), duplicate-scoring weights, inference and question-planning rules, deployment, assumptions and limitations, and the testing strategy.
 
 ## 5. Setup
 
@@ -100,7 +69,7 @@ cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
 cd ../frontend && npm install && npm run dev                          # UI on :5173 (proxies /api)
 ```
 
-Run the tests with `cd backend && .venv/bin/python -m pytest -q`. There are 16 tests, including the full demo journey through the API and the Claude code paths with the API mocked.
+Run the tests with `cd backend && .venv/bin/python -m pytest -q` (on Windows, `.venv\Scripts\python.exe`). There are 81 tests with 95% statement coverage; add `--cov=app` to see the per-module figures. They cover the full demo journey through the API and every agent module, with the Anthropic client mocked. See [DESIGN.md §6](docs/DESIGN.md#6-testing-strategy).
 
 ## 6. Environment variables
 
