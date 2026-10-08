@@ -1,6 +1,8 @@
 """Unit tests for the agent's deterministic tools and the Claude code paths (with the API mocked)."""
 from types import SimpleNamespace
 
+import pytest
+
 from conftest import wait_until_processed
 
 from app.agent import chat_agent, document_interpreter as interp
@@ -270,3 +272,41 @@ def test_category_enum_comes_from_policy():
     schema = interp.extraction_schema()
     enum = schema["properties"]["categorySuggestion"]["properties"]["category"]["enum"]
     assert enum == list(load_policy()["categories"].keys())
+
+
+def test_offline_pdf_text_parser():
+    text = ("Sharma Office Mart\nGSTIN 29AAEPC6634H1Z1\nInvoice No: SOM-2291\nInvoice Date: 12-09-2026\n"
+            "Pens and paper\nGST @ 18%: 90.00\nGrand Total: Rs. 590.00\n")
+    out = interp._pdf_text_extract(text)
+    f = out["fields"]
+    assert f["merchant"]["value"] == "Sharma Office Mart" and f["invoiceNumber"]["value"] == "SOM-2291"
+    assert f["expenseDate"]["value"] == "2026-09-12" and f["total"]["value"] == "590.00"
+    assert f["gstin"]["value"] == "29AAEPC6634H1Z1" and f["currency"]["value"] == "INR"
+    assert f["total"]["confidence"] == 0.8 and not out["multipleTotalsFound"]
+    two = interp._pdf_text_extract(text + "Total: 500.00\n")
+    assert two["multipleTotalsFound"] and two["fields"]["total"]["confidence"] == 0.6
+    assert interp._pdf_text_extract("too short") is None
+
+
+def test_offline_extract_paths_for_unknown_files():
+    pdf = interp.InspectedFile(kind="pdf", media_type="application/pdf",
+                               text="Some Vendor Pvt Ltd\nInvoice No: X-77\nDate: 2026-09-10\nTotal: 1,200.00 INR\n")
+    assert interp.extract(b"%PDF", "unknown", "x.pdf", pdf).mode == "pdf-text"
+    img = interp.InspectedFile(kind="image", media_type="image/jpeg")
+    ex = interp.extract(b"\xff\xd8\xff", "unknown", "x.jpg", img)
+    assert ex.mode == "none" and "offline mode has no OCR" in ex.raw["notes"][0]
+
+
+def test_inspect_images():
+    import io as _io
+    from PIL import Image
+    buf = _io.BytesIO()
+    Image.new("RGB", (400, 600), "white").save(buf, "PNG")
+    insp = interp.inspect_file(buf.getvalue())
+    assert insp.kind == "image" and insp.media_type == "image/jpeg" and len(insp.ahash) == 64
+    tiny = _io.BytesIO()
+    Image.new("RGB", (40, 40), "white").save(tiny, "PNG")
+    with pytest.raises(interp.DocumentError, match="too small"):
+        interp.inspect_file(tiny.getvalue())
+    with pytest.raises(interp.DocumentError, match="couldn't be read"):
+        interp.inspect_file(b"\x89PNG\r\n\x1a\n" + b"0" * 50)
