@@ -159,9 +159,10 @@ def apply_answer(claim_id: str, q: dict, text: str, option: str | None) -> str:
             if attendees:
                 changes["attendees"] = attendees
             cm.update_fields(e["id"], changes, via="chat")
+            limit_note = _limit_note(e["id"])
             if attendees:
-                return f"Got it — I've recategorised the {merchant} bill as Client Entertainment with attendees {attendees}. That's within the {inr(5000)} per-event limit."
-            return f"Got it — I've recategorised the {merchant} bill as Client Entertainment. Policy also needs the attendees for client meals."
+                return f"Got it — I've recategorised the {merchant} bill as Client Entertainment with attendees {attendees}.{limit_note}"
+            return f"Got it — I've recategorised the {merchant} bill as Client Entertainment.{limit_note} Policy also needs the attendees for client meals."
         if choice == "team":
             purpose = _clean_purpose(text) if len(text) > 12 else "Team meal"
             changes = {"businessPurpose": purpose}
@@ -255,6 +256,21 @@ def apply_answer(claim_id: str, q: dict, text: str, option: str | None) -> str:
         return f"Updated {fval(e, 'merchant') or 'the expense'}: {pretty}."
 
     raise NeedsMore("I'm not sure how to apply that — you can also edit the expense directly in the table.")
+
+
+def _limit_note(expense_id: str) -> str:
+    """' That's within/over the <limit> limit…' for an expense's current category, read from policy and its results."""
+    e = db.get_expense(expense_id)
+    if not e:
+        return ""
+    limit = load_policy()["categories"].get(e["category"]["value"], {}).get("limit")
+    if not limit:
+        return ""
+    limit_text = f"{inr(limit['amount'])} per-{limit['per']} limit"
+    over = next((r for r in e.get("policyResults", []) if r["code"].startswith("OVER_LIMIT")), None)
+    if over:
+        return f" That's over the {limit_text} by {inr(over['excess'])}."
+    return f" That's within the {limit_text}."
 
 
 def cap_reply(e: dict) -> str:

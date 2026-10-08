@@ -21,7 +21,7 @@ from .. import db
 from ..observability import log_event
 from ..settings import get_settings, load_policy
 from . import classifier, document_interpreter as interp, duplicates, enrich, planner
-from .fields import FIELD_DEFS, field_state, fval, inr, make_field, short_date
+from .fields import FIELD_DEFS, fval, inr, make_field, short_date
 from .normaliser import coerce, normalise
 from .policy import evaluate
 

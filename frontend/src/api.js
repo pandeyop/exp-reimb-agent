@@ -57,11 +57,14 @@ export function money(v, currency = 'INR', decimals = false) {
   return `${n < 0 ? '-' : ''}${sym}${Math.abs(n).toLocaleString(currency === 'INR' ? 'en-IN' : 'en-US', opts)}`
 }
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 export function shortDate(iso) {
   if (!iso) return '—'
   const d = new Date(iso + 'T00:00:00')
   if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  // Fixed three-letter months: browsers' en-GB 'short' month renders September as "Sept".
+  return `${d.getDate()} ${SHORT_MONTHS[d.getMonth()]}`
 }
 
 export function longDate(iso) {

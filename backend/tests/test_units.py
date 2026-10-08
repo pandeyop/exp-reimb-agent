@@ -240,3 +240,33 @@ def test_cap_wording_uses_the_expense_share():
     hotel["policyResults"] = evaluate([hotel], policy, get_settings().today())["h"]
     assert _cap_label(hotel["policyResults"][0]) == "Cap at the limit (₹22,500)"
     assert "up to the policy limit (₹22,500); the excess of ₹2,070" in chat_agent.cap_reply(hotel)
+
+
+def test_total_plausibility_check():
+    def raw(**vals):
+        return {"fields": {k: {"value": str(v), "confidence": 0.97} for k, v in vals.items()}}
+
+    ok = normalise(raw(subtotal=1760, tax=88, total=1850))  # ₹2 round-off is within tolerance
+    assert ok["fields"]["total"]["confidence"] == 0.97 and not ok["notes"]
+    with_extras = normalise(raw(subtotal=1000, tax=50, serviceCharge=100, tip=50, total=1200))
+    assert with_extras["fields"]["total"]["confidence"] == 0.97
+
+    bad = normalise(raw(subtotal=1000, tax=50, total=1500))
+    assert bad["fields"]["total"]["confidence"] == 0.65
+    assert "doesn't match the total" in bad["fields"]["total"]["reason"]
+    assert any("don't add up" in n for n in bad["notes"])
+
+    partial = normalise(raw(tax=50, total=1500))  # subtotal unknown: nothing to check
+    assert partial["fields"]["total"]["confidence"] == 0.97
+
+
+def test_demo_fixtures_pass_the_plausibility_check():
+    for doc in interp._load_fixtures().values():
+        n = normalise(doc["extraction"])
+        assert not any("don't add up" in note for note in n["notes"]), doc["filename"]
+
+
+def test_category_enum_comes_from_policy():
+    schema = interp.extraction_schema()
+    enum = schema["properties"]["categorySuggestion"]["properties"]["category"]["enum"]
+    assert enum == list(load_policy()["categories"].keys())

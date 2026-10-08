@@ -79,6 +79,25 @@ def coerce(name: str, value: Any) -> Any:
     return s[:500]
 
 
+def check_total_plausibility(fields: dict[str, dict], notes: list[str]) -> None:
+    """Cross-check the arithmetic: subtotal + tax (+ service charge + tip) should equal the total.
+
+    Only runs when subtotal, tax and total are all known. A mismatch beyond max(₹2, 2%) means one of
+    the values was probably misread, so the total's confidence is capped below the review threshold
+    and the employee is asked to confirm it.
+    """
+    v = {k: fields[k]["value"] for k in ("subtotal", "tax", "serviceCharge", "tip", "total")}
+    if v["subtotal"] is None or v["tax"] is None or v["total"] is None:
+        return
+    expected = round(v["subtotal"] + v["tax"] + (v["serviceCharge"] or 0) + (v["tip"] or 0), 2)
+    if abs(expected - v["total"]) <= max(2.0, 0.02 * abs(v["total"])):
+        return
+    parts = "subtotal + tax" + (" + service charge" if v["serviceCharge"] else "") + (" + tip" if v["tip"] else "")
+    fields["total"]["confidence"] = min(fields["total"]["confidence"], 0.65)
+    fields["total"]["reason"] = f"The {parts} ({expected:,.2f}) doesn't match the total ({v['total']:,.2f})."
+    notes.append(f"The line amounts don't add up to the total ({parts} = {expected:,.2f} vs total {v['total']:,.2f}); please confirm the total.")
+
+
 def normalise(raw: dict) -> dict:
     """Return {fields, lineItems, documentType, readability, categorySuggestion, notes, multipleTotalsFound}."""
     notes: list[str] = [mask_card_numbers(str(n))[:300] for n in (raw.get("notes") or []) if n]
@@ -102,6 +121,7 @@ def normalise(raw: dict) -> dict:
     if raw.get("multipleTotalsFound") and out_fields["total"]["value"] is not None:
         out_fields["total"]["confidence"] = min(out_fields["total"]["confidence"], 0.65)
         out_fields["total"]["reason"] = "More than one total appears on this document."
+    check_total_plausibility(out_fields, notes)
 
     line_items = []
     for item in (raw.get("lineItems") or [])[:50]:

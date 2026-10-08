@@ -108,7 +108,7 @@ def test_full_demo_journey(client):
 def test_blocking_until_resolved(client):
     cid = client.post("/api/claims").json()["claim"]["id"]
     client.post(f"/api/claims/{cid}/demo-documents")
-    snap = wait_until_processed(client, cid)
+    wait_until_processed(client, cid)
     assert client.post(f"/api/claims/{cid}/submit", json={"confirm": True}).status_code == 409
 
 
@@ -122,11 +122,35 @@ def test_team_meal_triggers_policy_violation_and_personal_excludes(client):
     dinner = _by_merchant(snap, "Hops")[0]
     assert dinner["status"] == "POLICY_VIOLATION"
     assert any(r["code"] == "OVER_LIMIT" and r["excess"] == 350 for r in dinner["policyResults"])
-    # Switch to personal through an edit-free chat answer path: exclude
+    # A justification turns the violation into a non-blocking warning
     client.post(f"/api/expenses/{dinner['id']}/policy-override", json={"action": "justify", "justification": "Team celebration after signing"})
     snap = client.get(f"/api/claims/{cid}").json()
     dinner = _by_merchant(snap, "Hops")[0]
     assert dinner["status"] == "WARNING"
+
+    # The "personal" answer on a fresh claim excludes the bill and drops it from the total
+    cid = client.post("/api/claims").json()["claim"]["id"]
+    client.post(f"/api/claims/{cid}/demo-documents")
+    snap = wait_until_processed(client, cid)
+    total_before = snap["claim"]["totalAmount"]
+    q = _q(snap, "meal_purpose")
+    reply = client.post(f"/api/claims/{cid}/chat", json={"questionId": q["id"], "option": "personal"}).json()["reply"]
+    assert "aren't reimbursable" in reply["text"]
+    snap = client.get(f"/api/claims/{cid}").json()
+    dinner = _by_merchant(snap, "Hops")[0]
+    assert dinner["excluded"] and dinner["status"] == "EXCLUDED"
+    assert snap["claim"]["totalAmount"] == total_before - 1850
+    assert all(q["kind"] != "meal_purpose" for q in snap["questions"])
+
+
+def test_client_meal_reply_states_the_real_limit(client):
+    cid = client.post("/api/claims").json()["claim"]["id"]
+    client.post(f"/api/claims/{cid}/demo-documents")
+    snap = wait_until_processed(client, cid)
+    q = _q(snap, "meal_purpose")
+    reply = client.post(f"/api/claims/{cid}/chat", json={
+        "questionId": q["id"], "message": "Client dinner with Priya Shah from Northwind", "option": "client"}).json()["reply"]
+    assert "That's within the ₹5,000 per-event limit." in reply["text"]
 
 
 def test_rejects_bad_uploads(client):

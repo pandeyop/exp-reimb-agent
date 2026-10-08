@@ -16,13 +16,12 @@ import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
 
 from PIL import Image, ImageOps
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
-from ..settings import get_settings
+from ..settings import get_settings, load_policy
 from .fields import FIELD_DEFS
 from .llm import LLMError, structured_call
 
@@ -32,11 +31,6 @@ DOCUMENT_TYPES = [
     "air_ticket", "train_ticket", "ride_receipt", "taxi_receipt", "hotel_invoice", "restaurant_bill",
     "cafe_receipt", "fuel_receipt", "parking_slip", "toll_receipt", "telecom_bill", "retail_invoice",
     "conference_invoice", "saas_invoice", "metro_ticket", "bus_ticket", "other",
-]
-CATEGORY_CODES = [
-    "AIR_TRAVEL", "TRAIN_TRAVEL", "TAXI", "LOCAL_TRANSPORT", "HOTEL", "MEALS", "CLIENT_ENTERTAINMENT",
-    "FUEL", "PARKING", "TOLL", "MOBILE_INTERNET", "OFFICE_SUPPLIES", "TRAINING_CONFERENCE",
-    "SOFTWARE_SUBSCRIPTION", "MISCELLANEOUS",
 ]
 EXTRACTABLE_FIELDS = [f for f in FIELD_DEFS if f not in ("costCentre",)]
 
@@ -130,6 +124,11 @@ def _field_schema() -> dict:
     }
 
 
+def category_codes() -> list[str]:
+    """Reimbursement categories the model may suggest — taken from policy.json, so a new category is config-only."""
+    return list(load_policy()["categories"].keys())
+
+
 def extraction_schema() -> dict:
     num_text = {"type": "string"}  # plain numbers as text; "" when absent (keeps the schema free of unions)
     return {
@@ -161,7 +160,7 @@ def extraction_schema() -> dict:
             "categorySuggestion": {
                 "type": "object",
                 "properties": {
-                    "category": {"type": "string", "enum": CATEGORY_CODES},
+                    "category": {"type": "string", "enum": category_codes()},
                     "confidence": {"type": "number"},
                     "reason": {"type": "string"},
                 },

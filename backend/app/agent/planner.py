@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 from .fields import (
-    FIELD_DEFS, FINANCIAL_CORE, INFERRED, KNOWN, LOW_CONFIDENCE, MISSING, NOT_REQUIRED,
+    FIELD_DEFS, INFERRED, KNOWN, LOW_CONFIDENCE, MISSING, NOT_REQUIRED,
     field_state, fval, inr, label, nice_date, short_date,
 )
 
