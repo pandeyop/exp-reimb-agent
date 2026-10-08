@@ -107,7 +107,8 @@ def route(text: str, open_q: list[dict], snap: dict) -> dict:
     def fit(q: dict) -> float:
         k = q["kind"]
         if k == "duplicate":
-            return 3 if re.search(r"\b(duplicate|same receipt|keep both|both are|separate|twice)\b", low) else 0
+            # Same vocabulary apply_answer() accepts for a duplicate decision.
+            return 3 if re.search(r"\b(duplicate|dup|same (receipt|ride|bill|one|expense)|keep both|both are|separate|twice)\b", low) else 0
         if k in ("over_limit", "justification"):
             s = 3 if re.search(r"\b(cap|limit|justif|over|hotel|sold out|approv)", low) else 0
             return s + (0.5 if k == "justification" else 0)
