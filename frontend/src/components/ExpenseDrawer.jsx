@@ -123,7 +123,7 @@ export default function ExpenseDrawer({ snap, expense: e, run, onClose, readOnly
                 {!readOnly && (
                   <>
                     <div className="row-btns">
-                      <button className={`btn ${e.policyDecision?.type === 'cap' ? 'primary' : ''}`} onClick={() => run(() => api.policyOverride(e.id, 'cap'), 'Capped at the policy limit').catch(() => {})}>Cap at {money(over.limit)}</button>
+                      <button className={`btn ${e.policyDecision?.type === 'cap' ? 'primary' : ''}`} onClick={() => run(() => api.policyOverride(e.id, 'cap'), 'Capped at the policy limit').catch(() => {})}>Cap at {money(over.cappedAmount ?? over.limit)}</button>
                       {e.policyDecision && <button className="btn ghost" onClick={() => run(() => api.policyOverride(e.id, 'clear')).catch(() => {})}>Undo decision</button>}
                     </div>
                     <div className="justify">

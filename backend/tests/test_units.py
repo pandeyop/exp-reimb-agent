@@ -55,10 +55,72 @@ def test_policy_daily_meal_limit_and_future_date():
     b = _exp("b", "MEALS", 800, "2026-09-22", 1)
     fut = _exp("c", "TAXI", 300, "2026-12-01", 2)
     res = evaluate([a, b, fut], policy, get_settings().today())
-    over = next(r for r in res["b"] if r["code"] == "OVER_LIMIT")
-    assert over["excess"] == 200 and over["blocking"]
-    assert any(r["code"] == "PERIOD_SHARED" for r in res["a"])
+    # ₹800 fits under the ₹1,500 limit; adding the ₹900 crosses it, so ₹900 carries the ₹200 excess.
+    over = next(r for r in res["a"] if r["code"] == "OVER_LIMIT")
+    assert over["excess"] == 200 and over["blocking"] and over["cappedAmount"] == 700
+    assert any(r["code"] == "PERIOD_SHARED" for r in res["b"])
     assert any(r["code"] == "FUTURE_DATED" and r["blocking"] for r in res["c"])
+
+
+def test_period_excess_goes_to_the_expense_that_crosses_the_limit():
+    """Regression: a ₹2,000 dinner then a ₹100 coffee used to charge the ₹600 excess to the coffee."""
+    policy = load_policy()
+    dinner = _exp("dinner", "MEALS", 2000, "2026-09-22", 0, merchant="Dinner place")
+    coffee = _exp("coffee", "MEALS", 100, "2026-09-22", 1, merchant="Coffee place")
+    res = evaluate([dinner, coffee], policy, get_settings().today())
+    over = next(r for r in res["dinner"] if r["code"] == "OVER_LIMIT")
+    assert over["excess"] == 600 and over["cappedAmount"] == 1400 and over["limit"] == 1500
+    assert "Excess ₹600" in over["message"] and "Policy limit ₹1,500" in over["message"]
+    assert [r["code"] for r in res["coffee"]] == ["PERIOD_SHARED"]
+
+    # Capping reduces the dinner to ₹1,400 so the day totals exactly the limit.
+    dinner["policyDecision"] = {"type": "cap"}
+    evaluate([dinner, coffee], policy, get_settings().today())
+    assert dinner["reimbursableAmount"] == 1400 and coffee["reimbursableAmount"] == 100
+
+    # Even a decision recorded against the small expense can never make it negative.
+    coffee["policyDecision"] = {"type": "cap"}
+    dinner["policyDecision"] = None
+    evaluate([dinner, coffee], policy, get_settings().today())
+    assert coffee["reimbursableAmount"] == 100 and dinner["reimbursableAmount"] == 2000
+
+
+def test_capped_period_payload_is_accepted_by_mock_finance():
+    from app import mock_finance
+    policy = load_policy()
+    dinner = _exp("dinner", "MEALS", 2000, "2026-09-22", 0, merchant="Dinner place")
+    coffee = _exp("coffee", "MEALS", 100, "2026-09-22", 1, merchant="Coffee place")
+    dinner["policyDecision"] = {"type": "cap"}
+    evaluate([dinner, coffee], policy, get_settings().today())
+    lines = [{"expenseId": x["id"], "category": "MEALS", "merchant": x["fields"]["merchant"]["value"],
+              "expenseDate": "2026-09-22", "amount": x["fields"]["total"]["value"],
+              "reimbursableAmount": x["reimbursableAmount"], "currency": "INR"} for x in (dinner, coffee)]
+    assert min(x["reimbursableAmount"] for x in lines) >= 0
+    resp = mock_finance.submit_reimbursement({"employeeId": "EMP001", "claimId": "CLM-TEST", "expenses": lines,
+                                              "totalAmount": 1500, "currency": "INR"})
+    assert resp["status"] == "SUBMITTED" and resp["claimReference"].startswith("ER-")
+
+
+def test_period_excess_split_across_three_expenses():
+    """₹900 + ₹1,000 + ₹1,100 against ₹1,500/day: ₹1,500 excess, split ₹400 / ₹1,100 by who crosses the limit."""
+    from app.agent.policy import period_excess_shares
+    policy = load_policy()
+    items = [_exp("x900", "MEALS", 900, "2026-09-23", 2), _exp("x1000", "MEALS", 1000, "2026-09-23", 0),
+             _exp("x1100", "MEALS", 1100, "2026-09-23", 1)]
+    shares = period_excess_shares(items, 1500)
+    assert shares == {"x1000": 400, "x1100": 1100}
+    assert sum(shares.values()) == 3000 - 1500
+    assert all(shares[i["id"]] <= i["fields"]["total"]["value"] for i in items if i["id"] in shares)
+
+    res = evaluate(items, policy, get_settings().today())
+    assert [r["code"] for r in res["x900"]] == ["PERIOD_SHARED"]
+    assert next(r for r in res["x1000"] if r["code"] == "OVER_LIMIT")["excess"] == 400
+    assert next(r for r in res["x1100"] if r["code"] == "OVER_LIMIT")["cappedAmount"] == 0
+    for x in items:
+        x["policyDecision"] = {"type": "cap"}
+    evaluate(items, policy, get_settings().today())
+    assert sum(x["reimbursableAmount"] for x in items) == 1500
+    assert min(x["reimbursableAmount"] for x in items) == 0
 
 
 def test_policy_cap_sets_reimbursable_amount():
@@ -162,3 +224,19 @@ def test_llm_chat_turn_applies_tool_calls(monkeypatch, client):
     assert next(e for e in snap["expenses"] if e["id"] == dup["id"])["excluded"]
     # tool results were fed back with the refreshed claim state
     assert any(b.get("type") == "tool_result" for b in seen[1][-1]["content"])
+
+
+def test_cap_wording_uses_the_expense_share():
+    from app.agent.planner import _cap_label
+    policy = load_policy()
+    dinner = _exp("dinner", "MEALS", 2000, "2026-09-22", 0, merchant="Dinner place")
+    coffee = _exp("coffee", "MEALS", 100, "2026-09-22", 1, merchant="Coffee place")
+    dinner["policyResults"] = evaluate([dinner, coffee], policy, get_settings().today())["dinner"]
+    r = dinner["policyResults"][0]
+    assert _cap_label(r) == "Cap to stay within the limit (claim ₹1,400)"
+    assert chat_agent.cap_reply(dinner) == ("Done — I'll claim Dinner place at ₹1,400 so the total stays within "
+                                            "the ₹1,500 limit; the excess of ₹600 won't be reimbursed.")
+    hotel = _exp("h", "HOTEL", 24570, "2026-09-24", nights=3, merchant="Hotel")
+    hotel["policyResults"] = evaluate([hotel], policy, get_settings().today())["h"]
+    assert _cap_label(hotel["policyResults"][0]) == "Cap at the limit (₹22,500)"
+    assert "up to the policy limit (₹22,500); the excess of ₹2,070" in chat_agent.cap_reply(hotel)

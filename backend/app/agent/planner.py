@@ -156,7 +156,7 @@ def plan(active: list[dict], groups: list[dict], policy: dict) -> list[dict]:
                 questions.append({
                     "id": f"over_limit:{eid}", "kind": "over_limit", "expenseIds": [eid], "fields": [],
                     "text": f"⚠ {r['title']} on {_desc(e)}. {r['message'].split(' Choose')[0]} How would you like to handle it?",
-                    "options": [_opt(f"Cap at the limit ({inr(r['limit'])})", "cap"),
+                    "options": [_opt(_cap_label(r), "cap"),
                                 _opt("Keep full amount & justify", "justify")],
                     "placeholder": "Or type a justification for your approver",
                 })
@@ -195,6 +195,14 @@ def plan(active: list[dict], groups: list[dict], policy: dict) -> list[dict]:
     order = {"trip_purpose": 0, "meal_purpose": 1, "attendees": 2, "fields": 3, "category": 4,
              "over_limit": 5, "justification": 5, "duplicate": 6}
     return sorted(questions, key=lambda q: order.get(q["kind"], 9))
+
+
+def _cap_label(r: dict) -> str:
+    """Quick-reply label for capping. For a shared daily/monthly limit this expense is only reduced by its share."""
+    capped = r.get("cappedAmount", r["limit"])
+    if abs(capped - r["limit"]) < 0.01:
+        return f"Cap at the limit ({inr(capped)})"
+    return f"Cap to stay within the limit (claim {inr(capped)})"
 
 
 def _fields_question(e: dict, gaps: list[dict], gap_fields: list[str], groups: list[dict]) -> dict:

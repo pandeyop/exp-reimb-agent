@@ -107,30 +107,50 @@ def evaluate(active: list[dict], policy: dict, today: date) -> dict[str, list[di
         if spent <= amount:
             continue
         label = cats[cat].get("label", cat)
-        # Attribute the excess to the latest expense in the period; flag the others for context.
-        items = sorted(items, key=lambda x: x["seq"])
-        culprit = items[-1]
         when = nice_date(key) if per == "day" else date.fromisoformat(key + "-01").strftime("%B %Y")
         detail = f"{label} on {when} total {inr(spent)} across {len(items)} expenses" if len(items) > 1 else None
-        _over_limit(results, culprit, label, spent, amount, f"per {per}", spent - amount, detail=detail)
-        for other in items[:-1]:
-            results[other["id"]].append(_result("PERIOD_SHARED", "info", "Counts toward a daily limit",
-                                                f"Together with other {label.lower()} on {when}, this exceeds the {inr(amount)}/{per} limit; the excess is attributed to the latest expense."))
+        shares = period_excess_shares(items, amount)
+        for e in items:
+            share = shares.get(e["id"], 0.0)
+            if share > 0:
+                _over_limit(results, e, label, spent, amount, f"per {per}", share, detail=detail)
+            else:
+                results[e["id"]].append(_result("PERIOD_SHARED", "info", f"Counts toward a {'daily' if per == 'day' else 'monthly'} limit",
+                                                f"Together with other {label.lower()} on {when}, this exceeds the {inr(amount)}/{per} limit; "
+                                                f"the excess is attributed to the expense{'s' if len(shares) > 1 else ''} that take the total over the limit."))
     return results
+
+
+def period_excess_shares(items: list[dict], limit: float) -> dict[str, float]:
+    """Split a period's excess (spent - limit) across the expenses that push it over the limit.
+
+    Expenses are added smallest first (ties by upload order); each expense is charged only the part
+    of it that lies above the limit, so the shares sum to the total excess and no expense is charged
+    more than its own amount. Smaller expenses that fit under the limit are not charged at all.
+    """
+    shares: dict[str, float] = {}
+    running = 0.0
+    for e in sorted(items, key=lambda x: (fval(x, "total"), x["seq"])):
+        before, running = running, running + fval(e, "total")
+        if running > limit:
+            shares[e["id"]] = round(running - max(before, limit), 2)
+    return shares
 
 
 def _over_limit(results, e, label, claimed, limit, per_text, excess, detail=None):
     decision = e.get("policyDecision") or {}
-    excess = round(excess, 2)
+    total = fval(e, "total") or 0
+    excess = round(min(excess, total), 2)
+    capped_amount = round(max(total - excess, 0.0), 2)  # what this expense reimburses if capped
     base = {
-        "claimed": round(claimed, 2), "limit": round(limit, 2), "excess": excess,
+        "claimed": round(claimed, 2), "limit": round(limit, 2), "excess": excess, "cappedAmount": capped_amount,
         "resolvable": True, "detail": detail,
     }
     msg_core = f"Claimed {inr(claimed)} · Policy limit {inr(limit)} ({per_text}) · Excess {inr(excess)}"
     if detail:
         msg_core = f"{detail} · Policy limit {inr(limit)} ({per_text}) · Excess {inr(excess)}"
     if decision.get("type") == "cap":
-        e["reimbursableAmount"] = round((fval(e, "total") or 0) - excess, 2)
+        e["reimbursableAmount"] = capped_amount
         results[e["id"]].append(_result("OVER_LIMIT_CAPPED", "info", f"{label} capped at policy limit",
                                         f"{msg_core}. You chose to claim only up to the limit; {inr(excess)} will not be reimbursed.",
                                         resolution="cap", **base))

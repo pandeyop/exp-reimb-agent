@@ -207,8 +207,7 @@ def apply_answer(claim_id: str, q: dict, text: str, option: str | None) -> str:
                 choice = "justify"
         if choice == "cap":
             cm.policy_decision(e["id"], "cap")
-            r = next((r for r in e.get("policyResults", []) if r["code"] == "OVER_LIMIT"), {})
-            return f"Done — I'll claim {fval(e, 'merchant')} up to the policy limit ({inr(r.get('limit'))}); the excess of {inr(r.get('excess'))} won't be reimbursed."
+            return cap_reply(e)
         cm.policy_decision(e["id"], "justify", None)
         return "OK — keeping the full amount. I just need a one-line justification for your approver."
 
@@ -256,6 +255,19 @@ def apply_answer(claim_id: str, q: dict, text: str, option: str | None) -> str:
         return f"Updated {fval(e, 'merchant') or 'the expense'}: {pretty}."
 
     raise NeedsMore("I'm not sure how to apply that — you can also edit the expense directly in the table.")
+
+
+def cap_reply(e: dict) -> str:
+    """Confirmation for a cap decision, using the numbers of the expense's own over-limit result."""
+    r = next((r for r in e.get("policyResults", []) if r["code"] == "OVER_LIMIT"), None)
+    if not r:
+        return f"Done — {fval(e, 'merchant')} is capped at the policy limit."
+    capped = r.get("cappedAmount", r["limit"])
+    if abs(capped - r["limit"]) < 0.01:
+        how = f"up to the policy limit ({inr(capped)})"
+    else:
+        how = f"at {inr(capped)} so the total stays within the {inr(r['limit'])} limit"
+    return f"Done — I'll claim {fval(e, 'merchant')} {how}; the excess of {inr(r['excess'])} won't be reimbursed."
 
 
 def status_text(snap: dict) -> str:
