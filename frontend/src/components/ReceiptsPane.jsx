@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { api } from '../api.js'
 import { DOC_STATUS } from '../status.js'
 
-const ACCEPT = '.jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf'
+const ACCEPT = '.jpg,.jpeg,.jfif,.png,.pdf,image/jpeg,image/png,application/pdf'
 
 export default function ReceiptsPane({ snap, run, onSelect, disabled }) {
   const [drag, setDrag] = useState(false)

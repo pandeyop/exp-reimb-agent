@@ -117,6 +117,7 @@ def test_scanned_pdf_answered_in_one_chat_reply(client):
         if snap["claim"]["dashboard"]["processing"] == 0 and snap["questions"]:
             break
         time.sleep(0.1)
+    assert any("scanned image with no text layer" in n for n in snap["expenses"][0]["extractionNotes"])
     q = question(snap, "fields")
     assert {"merchant", "expenseDate", "currency", "total", "description"} <= set(q["fields"])
 
@@ -136,3 +137,24 @@ def test_route_still_prefers_the_fields_question_for_an_amount():
     q = [{"id": "f", "kind": "fields", "fields": ["total"], "expenseIds": ["x"]},
          {"id": "c", "kind": "category", "fields": ["category"], "expenseIds": ["y"]}]
     assert chat_agent.route("23 Sep, ₹1234", q, {"expenses": []})["id"] == "f"
+
+
+def test_scanned_pdf_gets_a_specific_offline_message():
+    from app.agent import document_interpreter as interp
+    scanned = interp.inspect_file(_image_only_pdf())
+    assert scanned.kind == "pdf" and len(scanned.text.strip()) < 40
+    ex = interp.extract(b"%PDF", "unknown", "scan.pdf", scanned)
+    assert ex.mode == "none"
+    assert ex.raw["notes"] == ["This PDF is a scanned image with no text layer; offline mode can't read it. "
+                               "Please enter the key details."]
+    image = interp.InspectedFile(kind="image", media_type="image/jpeg")
+    assert "offline mode has no OCR for unknown images" in interp.extract(b"x", "unknown", "a.jpg", image).raw["notes"][0]
+
+
+def test_jfif_upload_is_accepted(client):
+    cid = client.post("/api/claims").json()["claim"]["id"]
+    buf = io.BytesIO()
+    Image.new("RGB", (400, 600), "white").save(buf, "JPEG")  # .jfif files are JPEGs
+    r = client.post(f"/api/claims/{cid}/documents", files=[("files", ("receipt.jfif", buf.getvalue(), "image/jpeg"))])
+    assert r.status_code == 202 and r.json()["accepted"][0]["filename"] == "receipt.jfif"
+    assert r.json()["accepted"][0]["mediaType"] == "image/jpeg"

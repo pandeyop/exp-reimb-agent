@@ -88,7 +88,7 @@ export default function ExpenseDrawer({ snap, expense: e, run, onClose, readOnly
               <div className="row-btns">
                 <a className="link small" href={doc.url} target="_blank" rel="noreferrer">Open original ↗</a>
                 {!readOnly && <button className="link small" onClick={() => replaceInput.current?.click()}>Replace with a clearer copy</button>}
-                <input ref={replaceInput} type="file" hidden accept=".jpg,.jpeg,.png,.pdf" onChange={ev => {
+                <input ref={replaceInput} type="file" hidden accept=".jpg,.jpeg,.jfif,.png,.pdf" onChange={ev => {
                   const file = ev.target.files?.[0]
                   if (file) run(() => api.replaceDocument(doc.id, file), 'Re-uploaded — reading it again').then(onClose).catch(() => {})
                 }} />

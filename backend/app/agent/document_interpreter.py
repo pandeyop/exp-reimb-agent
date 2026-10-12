@@ -319,6 +319,9 @@ def extract(data: bytes, sha256: str, filename: str, insp: InspectedFile) -> Ext
         parsed = _pdf_text_extract(insp.text)
         if parsed:
             return Extraction(raw=parsed, mode="pdf-text", notes=notes)
+        if len(insp.text.strip()) < 40:  # same threshold as _pdf_text_extract
+            msg = "This PDF is a scanned image with no text layer; offline mode can't read it. Please enter the key details."
+            return Extraction(raw=_empty_extraction(msg), mode="none", notes=notes)
     msg = (
         "I couldn't read this document automatically"
         + (" (offline mode has no OCR for unknown images)" if not settings.ai_enabled else "")
