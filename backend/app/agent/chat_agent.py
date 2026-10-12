@@ -232,21 +232,7 @@ def apply_answer(claim_id: str, q: dict, text: str, option: str | None) -> str:
         if option == "confirm":
             cm.confirm_field(e["id"], q["fields"][0])
             return f"Thanks for confirming the {FIELD_DEFS[q['fields'][0]][0].lower()}."
-        changes = {}
-        for f in q["fields"]:
-            ftype = FIELD_DEFS[f][1]
-            if ftype == "date":
-                v = option if (option and re.fullmatch(r"\d{4}-\d{2}-\d{2}", option)) else parse_date(text, _date_context(claim_id, e))
-            elif ftype == "money":
-                v = parse_money(text)
-            elif ftype == "currency":
-                v = coerce("currency", option or text)
-            elif f == "merchant":
-                v = re.sub(r"(₹|rs\.?|inr)?\s*\d[\d,]*(\.\d+)?", "", text, flags=re.I).strip(" ,.-") or None
-            else:
-                v = text.strip() or None
-            if v is not None:
-                changes[f] = v
+        changes = parse_field_answer(text, q["fields"], _date_context(claim_id, e), option)
         if not changes:
             names = " and ".join(FIELD_DEFS[f][0].lower() for f in q["fields"])
             raise NeedsMore(f"Sorry, I couldn't find the {names} in that. Could you rephrase (e.g. “23 Sep”, “₹642”)?")
@@ -342,15 +328,18 @@ def _category_from_text(low: str, policy: dict) -> str | None:
 _CURRENCY = r"(?:₹|\brs\b\.?|\binr\b)"
 _AMOUNT = r"\d[\d,]*(?:\.\d{1,2})?"
 _MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?"
-# Number-bearing phrases that are never the amount: dates, times, ordinals, quantities, percentages.
-_NOT_MONEY = [
+# Number-bearing phrases that are dates or times.
+_DATE_LIKE = [
     r"\b\d{4}-\d{1,2}-\d{1,2}\b",                                        # 2026-09-23
     r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b",                           # 23/09, 23-09-2026
     r"\b\d{1,2}\.\d{1,2}\.\d{2,4}\b",                                    # 23.09.2026
     rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s*(?:of\s+)?{_MONTH}(?:,?\s*\d{{4}})?",  # 23 Sep (2026)
     rf"\b{_MONTH}\s+\d{{1,2}}(?:st|nd|rd|th)?\b(?:,?\s*\d{{4}})?",          # Sep 23rd, 2026
-    r"\b\d{1,2}(?:st|nd|rd|th)\b",                                       # the 23rd
+    r"\b(?:the\s+)?\d{1,2}(?:st|nd|rd|th)\b",                            # the 23rd
     r"\b\d{1,2}:\d{2}\b",                                                # 10:42
+]
+# ...plus quantities and percentages: never the amount.
+_NOT_MONEY = _DATE_LIKE + [
     r"\b\d+(?:\.\d+)?\s*%",                                              # 18%
     r"\b\d+\s*(?:x|pcs?|people|persons?|pax|guests?|covers?|nights?|days?|hours?|hrs?|km|kms|items?|units?)\b",
 ]
@@ -374,6 +363,111 @@ def parse_money(text: str) -> float | None:
     candidates = {coerce("total", m) for m in re.findall(rf"(?<![\w.-]){_AMOUNT}(?![\w-])", t)}
     candidates.discard(None)
     return candidates.pop() if len(candidates) == 1 else None
+
+
+_CURRENCY_SYMBOLS = {"₹": "INR", "$": "USD", "€": "EUR", "£": "GBP"}
+_CURRENCY_CODES = {"INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD", "JPY", "CHF", "CNY"}
+# Replies that only repeat what was asked for ("merchant name") — never saved as a value.
+_LABEL_ECHOES = {"merchant", "merchant name", "name", "vendor", "vendor name", "shop", "store", "date", "expense date",
+                 "amount", "total", "total amount", "price", "currency", "description", "purpose", "business purpose"}
+_LABELLED = {  # "description: printer paper" style answers
+    "merchant": "merchant", "vendor": "merchant", "date": "expenseDate", "amount": "total", "total": "total",
+    "currency": "currency", "description": "description", "purpose": "businessPurpose",
+    "business purpose": "businessPurpose", "cost centre": "costCentre", "cost center": "costCentre",
+    "project": "costCentre", "attendees": "attendees",
+}
+_EXAMPLES = {"merchant": "City Medicals", "expenseDate": "23 Sep", "currency": "INR", "total": "₹642",
+             "description": "for printer ink", "businessPurpose": "for the client workshop"}
+
+
+def _currency_in(text: str) -> str | None:
+    for symbol, code in _CURRENCY_SYMBOLS.items():
+        if symbol in text:
+            return code
+    if re.search(r"\brs\b\.?", text, re.I):
+        return "INR"
+    return next((tok.upper() for tok in re.findall(r"\b[A-Za-z]{3}\b", text) if tok.upper() in _CURRENCY_CODES), None)
+
+
+def _residue(part: str) -> str:
+    """What's left of a reply part once dates, weekdays, amounts and currency tokens are removed."""
+    t = re.sub(r"(?<=\d),(?=\d{2,3}\b)", "", part)
+    for pattern in _DATE_LIKE + [rf"\b(?:{'|'.join(WEEKDAYS)})\b", rf"{_CURRENCY}\s*{_AMOUNT}", rf"{_AMOUNT}\s*{_CURRENCY}",
+                                 r"[₹$€£]", rf"\b(?:{'|'.join(_CURRENCY_CODES)})\b", rf"(?<![\w.-]){_AMOUNT}(?![\w-])"]:
+        t = re.sub(pattern, " ", t, flags=re.I)
+    t = re.sub(r"\s+", " ", t).strip(" ,.;:-–—")
+    t = re.sub(r"^(?:paid\s+(?:at|to)|at|from|on)\s+", "", t, flags=re.I)
+    t = re.sub(r"\s+(?:on|at|of|for|and|paid)$", "", t, flags=re.I)
+    return t.strip(" ,.;:-–—")
+
+
+def _is_echo(value: str) -> bool:
+    return re.sub(r"[^a-z ]", "", value.lower()).strip() in _LABEL_ECHOES
+
+
+def _cap(s: str) -> str:
+    return s[:1].upper() + s[1:]
+
+
+def parse_field_answer(text: str | None, fields: list[str], ctx: dict, option: str | None = None) -> dict:
+    """Map a free-text reply onto the fields a question asked for.
+
+    "Apollo Pharmacy, 23 Sep, INR, ₹1,234" → merchant, date, currency and total from their own parts.
+    The merchant is whatever is left once date, money and currency tokens are removed; a description is
+    set only when clearly given ("for …" or "description: …") and never copied from the merchant.
+    A reply that only echoes a field label ("merchant name") raises NeedsMore with an example.
+    """
+    text = (text or "").strip()
+    out: dict = {}
+    parts = [p.strip() for p in re.split(r";|,(?!\d{2,3}(?!\d))", text) if p.strip()]
+    free: list[str] = []      # parts not claimed by a label or a "for …" phrase
+    purpose_like: list[str] = []
+    for part in parts:
+        m = re.match(rf"^({'|'.join(sorted(_LABELLED, key=len, reverse=True))})\s*[:=]\s*(.+)$", part, re.I)
+        if m and _LABELLED[m.group(1).lower()] in fields:
+            field, value = _LABELLED[m.group(1).lower()], m.group(2).strip()
+            if FIELD_DEFS[field][1] == "text":
+                out[field] = _cap(value)
+            continue
+        m = re.match(r"^for\s+(.+)$", part, re.I)
+        if m:
+            purpose_like.append(_cap(m.group(1).strip()))
+            continue
+        free.append(part)
+
+    for f in fields:
+        if f in out:
+            continue
+        ftype = FIELD_DEFS[f][1]
+        if ftype == "date":
+            v = option if (option and re.fullmatch(r"\d{4}-\d{2}-\d{2}", option)) else parse_date(text, ctx)
+        elif ftype == "money":
+            v = parse_money(text)
+        elif ftype == "currency":
+            v = coerce("currency", option) if option else _currency_in(text)
+        else:
+            v = None
+        if v is not None:
+            out[f] = v
+
+    text_fields = [f for f in fields if FIELD_DEFS[f][1] == "text" and f not in out]
+    if purpose_like:
+        target = next((f for f in ("description", "businessPurpose") if f in text_fields), None)
+        if target:
+            out[target] = purpose_like[0]
+            text_fields.remove(target)
+    leftovers = [r for r in (_residue(p) for p in free) if r]
+    if leftovers and _is_echo(leftovers[0]):
+        example = ", ".join(_EXAMPLES.get(f, FIELD_DEFS[f][0]) for f in fields if f in _EXAMPLES) or "the value itself"
+        raise NeedsMore(f"Please type the details themselves rather than the field names, e.g. “{example}”.")
+    if "merchant" in text_fields and leftovers:
+        out["merchant"] = leftovers[0]
+    elif len(fields) == 1 and text_fields == fields and text:
+        # A question that asks for a single text field (e.g. the business purpose) takes the whole reply.
+        if _is_echo(text):
+            raise NeedsMore(f"Please type the {FIELD_DEFS[fields[0]][0].lower()} itself, e.g. “{_EXAMPLES.get(fields[0], 'a few words')}”.")
+        out[fields[0]] = text
+    return out
 
 
 def _date_context(claim_id: str, e: dict) -> dict:
