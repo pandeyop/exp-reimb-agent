@@ -92,7 +92,7 @@ cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
 cd ../frontend && npm install && npm run dev                          # UI on :5173 (proxies /api)
 ```
 
-Run the tests with `cd backend && .venv/bin/python -m pytest -q` (on Windows, `.venv\Scripts\python.exe`). There are 81 tests with 95% statement coverage; add `--cov=app` to see the per-module figures. They cover the full demo journey through the API and every agent module, with the Anthropic client mocked. See [DESIGN.md §6](docs/DESIGN.md#6-testing-strategy).
+Run the tests with `cd backend && .venv/bin/python -m pytest -q` (on Windows, `.venv\Scripts\python.exe`). There are 119 tests with 95% statement coverage; add `--cov=app` to see the per-module figures. They cover the full demo journey through the API and every agent module, with the Anthropic client mocked. See [DESIGN.md §6](docs/DESIGN.md#6-testing-strategy).
 
 ## 6. Environment variables
 
