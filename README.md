@@ -10,7 +10,7 @@
 | 🌐 **Hosted app** | https://exp-reimb-agent.onrender.com |
 | 📐 **Technical design** | [docs/DESIGN.md](docs/DESIGN.md) |
 
-> **About the hosted app:** it runs in **offline demo mode**. For the 12 bundled sample receipts it replays recorded document extractions (matched by file hash) instead of calling the AI, so the public demo needs no API key and costs nothing to run. Everything after extraction is the real application: classification, inference, policy checks, duplicate detection, clarification questions, revalidation and mock submission. Free-text chat replies are handled by the deterministic interpreter instead of Claude tool use. **Live Claude extraction and chat are a separate capability.** They are enabled server-side with an `ANTHROPIC_API_KEY` and `EXTRACTION_MODE=auto` (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)), and are not switched on for the public instance. On the hosted app, other digitally generated PDFs containing an extractable text layer are processed using a basic heuristic parser. Scanned or image-only PDFs, and other images, cannot be automatically extracted in offline mode unless they match the bundled demo fixtures; the agent asks for the key details instead. The demo video also uses offline mode.
+> **About the hosted app:** the **12 bundled sample receipts** always replay recorded document extractions (matched by file hash), so the guided demo is deterministic and costs nothing to run. **Receipts you upload yourself** (photos, scans and PDFs) are read live by **OpenAI (`gpt-5.4-mini`)**, using the same structured-extraction schema, validation and confidence checks as the Claude path. Everything after extraction is the real application: classification, inference, policy checks, duplicate detection, clarification questions, revalidation and mock submission. Free-text chat replies are handled by the deterministic interpreter. Claude tool use for chat, and Claude extraction, need an `ANTHROPIC_API_KEY` and are not switched on for the public instance (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)). Please upload only fictional or non-sensitive receipts to the public app. The demo video was recorded in offline mode.
 
 An AI-native expense assistant. It turns a pile of unstructured receipts (photos, scans, PDFs) into a validated, policy-checked reimbursement claim. The employee does as little work as possible.
 
@@ -21,7 +21,7 @@ An AI-native expense assistant. It turns a pile of unstructured receipts (photos
 **https://exp-reimb-agent.onrender.com** is a single free Render Web Service built from the included `Dockerfile` and `render.yaml`. Click **Use the 12 demo receipts** and follow the [demo scenario](#9-demo-scenario-about-2-minutes).
 
 * **First visit:** the free instance sleeps after 15 minutes idle and takes about a minute to wake up.
-* **Offline demo mode:** the hosted app replays recorded extractions for the bundled receipts and doesn't call Claude (see the note above).
+* **AI reading:** the bundled demo receipts replay recorded extractions; your own uploads are read by OpenAI (see the note above).
 * **Data:** demo claims are temporary and reset whenever the service restarts or redeploys. Please use only the bundled fictional receipts.
 * **Verify it yourself:** `python scripts/verify_deployment.py https://exp-reimb-agent.onrender.com` runs the whole 12-receipt demo end to end through the public API, using only the Python standard library.
 
