@@ -1,0 +1,47 @@
+# Docker matches these relative to the build context root; "**/" makes a pattern apply at any depth.
+
+# Secrets and local configuration — never sent to the build context
+**/.env
+**/.env.*
+!.env.example
+**/*.pem
+**/*.key
+
+# Local data: SQLite databases, uploads, caches
+data/
+**/*.sqlite3
+**/*.sqlite3-*
+**/*.db
+
+# Virtual environments and dependency folders (rebuilt inside the image)
+**/.venv/
+.videnv/
+.stage/
+frontend/node_modules/
+frontend/dist/
+
+# Python / test artefacts
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.coverage
+**/htmlcov/
+**/.ruff_cache/
+
+# Development-only material not needed at runtime
+.git/
+.gitignore
+.gitattributes
+.claude/
+.vscode/
+.idea/
+backend/tests/
+scripts/
+docs/
+video/
+*.md
+run.ps1
+run.sh
+Dockerfile
+.dockerignore
+render.yaml

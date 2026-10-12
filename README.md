@@ -8,6 +8,19 @@ An AI-native expense assistant. It turns a pile of unstructured receipts (photos
 
 ![Processed claim](docs/screenshots/01-processed-claim.jpg)
 
+## Hosted demo
+
+The app deploys as a single free Render Web Service from the included `Dockerfile` and `render.yaml`. The public demo runs in offline mode with the 12 bundled receipts, so it needs no API key and makes no paid API calls.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/pandeyop/exp-reimb-agent)
+
+* **URL once deployed:** `https://exp-reimb-agent.onrender.com` (Render may assign a different subdomain; check the service page).
+* **First visit:** free instances sleep after 15 minutes idle and take about a minute to wake up.
+* **Data:** demo data is temporary and resets on every restart or redeploy. Please use only the bundled fictional receipts.
+* **Check a deployment:** `python scripts/verify_deployment.py https://<your-service>.onrender.com` runs the whole demo end to end.
+
+Setup steps, environment variables (including how to switch on live Claude extraction with a server-side key), free-tier limits and verification are in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
+
 ---
 
 ## 1. Problem

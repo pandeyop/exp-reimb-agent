@@ -263,7 +263,7 @@ Read in `backend/app/settings.py`, optionally from `.env`, which is git-ignored.
 
 ### 3.3 Deployment
 
-The application is a single process with no external services except the Claude API. A minimal production-like deployment:
+The application is a single process with no external services except the Claude API. A ready-made free Render setup (Dockerfile, `render.yaml`, verification script) is described in [DEPLOYMENT.md](DEPLOYMENT.md). A minimal production-like deployment:
 
 * **Build:** run `npm ci && npm run build` in `frontend/`. FastAPI serves `frontend/dist` (the SPA catch-all in `main.py`) together with `/api` and `/mock-finance`.
 * **Run:** `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 --workers 1`, either in a single container or on a VM behind a reverse proxy (nginx or Caddy) that terminates TLS. Set the proxy's `client_max_body_size` above `MAX_UPLOAD_MB × MAX_FILES_PER_UPLOAD`, or lower those limits.
