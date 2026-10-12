@@ -4,20 +4,30 @@
 
 **Track:** AI Innovation Lab Season 2 — business case: Expense & Reimbursement Agent
 
+| | |
+|---|---|
+| ▶️ **Demo video (4 min)** | https://www.youtube.com/watch?v=8ON3TWi6uOk |
+| 🌐 **Hosted app** | https://exp-reimb-agent.onrender.com |
+| 📐 **Technical design** | [docs/DESIGN.md](docs/DESIGN.md) |
+
+> **About the hosted app:** it runs in **offline demo mode**. For the 12 bundled sample receipts it replays recorded document extractions (matched by file hash) instead of calling the AI, so the public demo needs no API key and costs nothing to run. Everything after extraction is the real application: classification, inference, policy checks, duplicate detection, clarification questions, revalidation and mock submission. Free-text chat replies are handled by the deterministic interpreter instead of Claude tool use. **Live Claude extraction and chat are a separate capability.** They are enabled server-side with an `ANTHROPIC_API_KEY` and `EXTRACTION_MODE=auto` (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)), and are not switched on for the public instance. On the hosted app, other text-based PDFs get only a basic offline parser, and other images aren't read automatically (the agent asks for the key details instead). The demo video also uses offline mode.
+
 An AI-native expense assistant. It turns a pile of unstructured receipts (photos, scans, PDFs) into a validated, policy-checked reimbursement claim. The employee does as little work as possible.
 
 ![Processed claim](docs/screenshots/01-processed-claim.jpg)
 
 ## Hosted demo
 
-The app deploys as a single free Render Web Service from the included `Dockerfile` and `render.yaml`. The public demo runs in offline mode with the 12 bundled receipts, so it needs no API key and makes no paid API calls.
+**https://exp-reimb-agent.onrender.com** is a single free Render Web Service built from the included `Dockerfile` and `render.yaml`. Click **Use the 12 demo receipts** and follow the [demo scenario](#9-demo-scenario-about-2-minutes).
+
+* **First visit:** the free instance sleeps after 15 minutes idle and takes about a minute to wake up.
+* **Offline demo mode:** the hosted app replays recorded extractions for the bundled receipts and doesn't call Claude (see the note above).
+* **Data:** demo claims are temporary and reset whenever the service restarts or redeploys. Please use only the bundled fictional receipts.
+* **Verify it yourself:** `python scripts/verify_deployment.py https://exp-reimb-agent.onrender.com` runs the whole 12-receipt demo end to end through the public API, using only the Python standard library.
+
+To deploy your own copy:
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/pandeyop/exp-reimb-agent)
-
-* **URL once deployed:** `https://exp-reimb-agent.onrender.com` (Render may assign a different subdomain; check the service page).
-* **First visit:** free instances sleep after 15 minutes idle and take about a minute to wake up.
-* **Data:** demo data is temporary and resets on every restart or redeploy. Please use only the bundled fictional receipts.
-* **Check a deployment:** `python scripts/verify_deployment.py https://<your-service>.onrender.com` runs the whole demo end to end.
 
 Setup steps, environment variables (including how to switch on live Claude extraction with a server-side key), free-tier limits and verification are in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
