@@ -20,6 +20,11 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
 
+# settings.py loads the developer's .env on import. Drop any real AI credentials it brought in, so no
+# test can ever reach a paid API; tests that need a provider set a fake key themselves.
+for _var in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+    os.environ.pop(_var, None)
+
 
 @pytest.fixture(scope="session")
 def client():
