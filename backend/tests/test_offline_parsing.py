@@ -158,3 +158,13 @@ def test_jfif_upload_is_accepted(client):
     r = client.post(f"/api/claims/{cid}/documents", files=[("files", ("receipt.jfif", buf.getvalue(), "image/jpeg"))])
     assert r.status_code == 202 and r.json()["accepted"][0]["filename"] == "receipt.jfif"
     assert r.json()["accepted"][0]["mediaType"] == "image/jpeg"
+
+
+def test_fields_placeholder_shows_values_not_field_names_and_parses_as_shown():
+    from app.agent.planner import field_example
+    placeholder = "e.g. " + ", ".join(field_example(f) for f in FIELDS)
+    assert placeholder == "e.g. City Medicals, 22 Sep, INR, ₹642, for printer ink"
+    assert not any(chat_agent._is_echo(part.strip()) for part in placeholder[5:].split(","))
+    assert parse_field_answer(placeholder[5:], FIELDS, CTX) == {
+        "merchant": "City Medicals", "expenseDate": "2026-09-22", "currency": "INR", "total": 642,
+        "description": "Printer ink"}

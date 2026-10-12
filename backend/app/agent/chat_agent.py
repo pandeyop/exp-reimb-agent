@@ -18,6 +18,7 @@ from . import claim_manager as cm
 from .fields import FIELD_DEFS, fval, inr, short_date
 from .llm import LLMError, tool_turn
 from .normaliser import coerce
+from .planner import FIELD_EXAMPLES
 
 log = logging.getLogger("expense_agent.chat")
 
@@ -376,8 +377,7 @@ _LABELLED = {  # "description: printer paper" style answers
     "business purpose": "businessPurpose", "cost centre": "costCentre", "cost center": "costCentre",
     "project": "costCentre", "attendees": "attendees",
 }
-_EXAMPLES = {"merchant": "City Medicals", "expenseDate": "23 Sep", "currency": "INR", "total": "₹642",
-             "description": "for printer ink", "businessPurpose": "for the client workshop"}
+_EXAMPLES = FIELD_EXAMPLES  # the same examples the question placeholders show
 
 
 def _currency_in(text: str) -> str | None:

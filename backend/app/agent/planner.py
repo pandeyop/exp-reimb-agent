@@ -205,6 +205,20 @@ def _cap_label(r: dict) -> str:
     return f"Cap to stay within the limit (claim {inr(capped)})"
 
 
+# Example values for answer placeholders: real-looking values, never the field names themselves, so the
+# placeholder can't invite a reply that only echoes a label. Typed exactly as shown, an example parses.
+FIELD_EXAMPLES = {
+    "merchant": "City Medicals", "expenseDate": "22 Sep", "currency": "INR", "total": "₹642",
+    "description": "for printer ink", "businessPurpose": "for the client workshop",
+    "attendees": "Priya Shah (Northwind)", "origin": "Hotel", "destination": "Client office",
+}
+_TYPE_EXAMPLES = {"date": "22 Sep", "money": "₹642", "int": "2", "currency": "INR"}
+
+
+def field_example(field: str) -> str:
+    return FIELD_EXAMPLES.get(field) or _TYPE_EXAMPLES.get(FIELD_DEFS[field][1]) or f"the {label(field).lower()}"
+
+
 def _fields_question(e: dict, gaps: list[dict], gap_fields: list[str], groups: list[dict]) -> dict:
     eid = e["id"]
     states = {g["field"]: g["state"] for g in gaps}
@@ -242,5 +256,5 @@ def _fields_question(e: dict, gaps: list[dict], gap_fields: list[str], groups: l
     return {
         "id": f"fields:{eid}:{'+'.join(gap_fields)}", "kind": "fields", "expenseIds": [eid], "fields": gap_fields,
         "text": text, "options": options,
-        "placeholder": "e.g. " + ", ".join({"total": "₹642", "expenseDate": "22 Sep", "merchant": "Merchant name"}.get(f, label(f)) for f in gap_fields),
+        "placeholder": "e.g. " + ", ".join(field_example(f) for f in gap_fields),
     }
