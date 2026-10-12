@@ -754,6 +754,7 @@ def snapshot(claim_id: str, questions: list[dict] | None = None) -> dict:
         "documents": public_docs,
         "expenses": [public_expense(e) for e in expenses],
         "questions": questions,
-        "ai": {"mode": "claude" if s.ai_enabled else "offline", "model": s.anthropic_model if s.ai_enabled else None},
+        "ai": {"mode": s.extraction_engine or "offline", "model": s.extraction_model,
+               "chat": "claude" if s.ai_enabled else "rules"},
         "policy": {"name": policy["name"], "categories": {k: {"label": v["label"], "limit": v.get("limit")} for k, v in policy["categories"].items()}},
     }

@@ -9,6 +9,11 @@ import ReviewModal from './components/ReviewModal.jsx'
 import SuccessScreen from './components/SuccessScreen.jsx'
 
 const STORAGE_KEY = 'expense-agent:claimId'
+const AI_TITLE = {
+  claude: model => `Uploaded documents are read live by ${model}; the bundled demo receipts replay recorded extractions`,
+  openai: model => `Uploaded photos and PDFs are read by OpenAI ${model}; the bundled demo receipts replay recorded extractions`,
+  offline: () => 'No AI key configured: replaying recorded extractions for the demo receipts and parsing PDF text for others',
+}
 const store = {
   get: () => { try { return localStorage.getItem(STORAGE_KEY) } catch { return null } },
   set: v => { try { localStorage.setItem(STORAGE_KEY, v) } catch { /* private mode */ } },
@@ -112,8 +117,8 @@ export default function App() {
           </div>
         </div>
         <div className="topbar-right">
-          <span className={`ai-badge ${snap.ai.mode}`} title={snap.ai.mode === 'claude' ? `Documents are read live by ${snap.ai.model}` : 'No Anthropic credentials found: replaying recorded extractions for the demo receipts and parsing PDF text for others'}>
-            <span className="dot" /> {snap.ai.mode === 'claude' ? `Claude · ${snap.ai.model}` : 'Offline demo mode'}
+          <span className={`ai-badge ${snap.ai.mode}`} title={AI_TITLE[snap.ai.mode]?.(snap.ai.model) ?? AI_TITLE.offline()}>
+            <span className="dot" /> {snap.ai.mode === 'claude' ? `Claude · ${snap.ai.model}` : snap.ai.mode === 'openai' ? `OpenAI · ${snap.ai.model}` : 'Offline demo mode'}
           </span>
           <span className="employee">{claim.employee.name} · {claim.employee.id}</span>
           <button className="btn ghost" onClick={newClaim}>+ New claim</button>

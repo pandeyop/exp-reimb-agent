@@ -92,7 +92,7 @@ cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
 cd ../frontend && npm install && npm run dev                          # UI on :5173 (proxies /api)
 ```
 
-Run the tests with `cd backend && .venv/bin/python -m pytest -q` (on Windows, `.venv\Scripts\python.exe`). There are 120 tests with 95% statement coverage; add `--cov=app` to see the per-module figures. They cover the full demo journey through the API and every agent module, with the Anthropic client mocked. See [DESIGN.md §6](docs/DESIGN.md#6-testing-strategy).
+Run the tests with `cd backend && .venv/bin/python -m pytest -q` (on Windows, `.venv\Scripts\python.exe`). There are 144 tests with 96% statement coverage; add `--cov=app` to see the per-module figures. They cover the full demo journey through the API and every agent module, with the Anthropic and OpenAI clients mocked. See [DESIGN.md §6](docs/DESIGN.md#6-testing-strategy).
 
 ## 6. Environment variables
 
@@ -100,8 +100,9 @@ See [`.env.example`](.env.example). The important ones:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `EXTRACTION_MODE` | `auto` | `auto` = Claude if credentials exist, else offline. `claude` = always use Claude. `offline` = never call the API. |
+| `EXTRACTION_MODE` | `auto` | `auto` = Claude if Anthropic credentials exist, else OpenAI if `OPENAI_API_KEY` is set, else offline. `claude` / `openai` = always use that provider. `offline` = never call an API. The 12 bundled demo receipts always replay their recorded extractions. |
 | `ANTHROPIC_API_KEY` | – | Read by the Anthropic SDK. `ANTHROPIC_AUTH_TOKEN` and `ant auth login` profiles also work. It stays server-side only. |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | – / `gpt-5.4-mini` | Optional: read uploaded photos and PDFs with OpenAI instead. Server-side only; chat stays rule-based without an Anthropic key. |
 | `ANTHROPIC_MODEL` | `claude-opus-5-5` | Model for extraction and chat. |
 | `ANTHROPIC_EFFORT` | `low` | Effort level. Extraction is a routine task, so raise this only if accuracy needs it. |
 | `ANTHROPIC_REFUSAL_FALLBACK` | `true` | Enables the server-side refusal fallback (beta). |

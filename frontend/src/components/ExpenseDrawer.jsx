@@ -209,7 +209,7 @@ export default function ExpenseDrawer({ snap, expense: e, run, onClose, readOnly
                 </table>
               )}
               <p className="muted small">
-                Read by: {e.extractionMode === 'claude' ? 'Claude (live)' : e.extractionMode === 'replay' ? 'recorded extraction (offline demo mode)' : e.extractionMode === 'pdf-text' ? 'offline PDF text parser' : 'not readable automatically'}
+                Read by: {e.extractionMode === 'claude' ? 'Claude (live)' : e.extractionMode === 'openai' ? 'OpenAI (live)' : e.extractionMode === 'replay' ? 'recorded extraction (offline demo mode)' : e.extractionMode === 'pdf-text' ? 'offline PDF text parser' : 'not readable automatically'}
                 {e.extractionNotes?.length > 0 && <> · {e.extractionNotes.join(' ')}</>}
               </p>
             </section>

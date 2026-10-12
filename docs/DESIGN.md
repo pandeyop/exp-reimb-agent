@@ -247,8 +247,9 @@ Read in `backend/app/settings.py`, optionally from `.env`, which is git-ignored.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `EXTRACTION_MODE` | `auto` | `auto`: Claude if credentials exist, else offline. `claude`: always Claude. `offline`: never call the API |
+| `EXTRACTION_MODE` | `auto` | `auto`: Claude if Anthropic credentials exist, else OpenAI if `OPENAI_API_KEY` is set, else offline. `claude` / `openai`: always that provider. `offline`: never call an API |
 | `ANTHROPIC_API_KEY` | — | Read by the Anthropic SDK (`ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_PROFILE` also count as credentials) |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | — / `gpt-5.4-mini` | Optional OpenAI document reading (photos and PDFs only) |
 | `ANTHROPIC_MODEL` | `claude-opus-5-5` | Model for extraction and chat |
 | `ANTHROPIC_EFFORT` | `low` | `output_config.effort` |
 | `ANTHROPIC_TIMEOUT_SECONDS` | `90` | SDK timeout (the SDK also retries twice) |
@@ -299,6 +300,8 @@ The application is a single process with no external services except the Claude 
 ### 4.2 Extraction and validation
 
 * **Claude:** images are re-encoded as JPEG (quality 88, longest side ≤ 1800 px) and sent as an `image` block; PDFs are sent as a `document` block. The reply is constrained by `output_config.format` to a JSON schema. The schema has a `{value, confidence}` pair for each of the 27 extractable fields (all except `costCentre`), plus `documentType`, `readability`, `lineItems`, `categorySuggestion` (its enum is built from `policy.json` categories), `multipleTotalsFound` and `notes`. Values are strings, with `""` meaning absent, so the schema has no union types. `max_tokens` is 6000. A failed call is retried once, unless the request was rejected or declined, and then degrades to offline extraction. With `EXTRACTION_MODE=claude` it degrades to an empty, "needs attention" extraction instead.
+* **OpenAI (optional):** with `EXTRACTION_MODE=openai`, or `auto` with only an `OPENAI_API_KEY`, `agent/openai_vision.py` sends the same prompt and schema through the Responses API. Photos go as `input_image` (detail `high`) and PDFs as `input_file`, with `text.format` set to the strict `json_schema`. Failures map to the same `LLMError`s and the same retry and fallback behaviour. The output goes through the same normaliser. OpenAI is only used to read documents; the chat uses Claude only when an Anthropic key is present.
+* **Demo safeguard:** before any AI call, a file whose SHA-256 matches a bundled demo receipt replays its recorded extraction. The demo is therefore identical, and free, whichever AI is configured.
 * **Offline:** a file whose SHA-256 is in `demo_receipts/fixtures.json` gets its recorded extraction replayed (`extractionMode: "replay"`). Other PDFs with a text layer of at least 40 characters go through a regex parser with fixed confidences: merchant 0.72, invoice number 0.85, date 0.80, GSTIN 0.90, tax 0.75, currency 0.90, total 0.80 (0.60 when several different totals appear). A PDF with no text layer (a scan) gets the message *"This PDF is a scanned image with no text layer; offline mode can't read it."* Anything else becomes an empty extraction; in both cases the agent asks for the core fields.
 * **Normaliser checks:** money, dates (years 2000–2100), integers and ISO currency codes are coerced. A value the model returned that cannot be parsed is dropped with a note. Card-number-like digit runs are masked to `XXXX-XXXX-XXXX-1234`, and `cardLast4` keeps only four digits. If the model reports `multipleTotalsFound`, the total's confidence is capped at **0.65**. If subtotal, tax and total are all known and subtotal + tax (+ service charge + tip) differs from the total by more than **max(₹2, 2% of total)**, the total's confidence is capped at **0.65**, with a reason and a note.
 
@@ -470,7 +473,7 @@ Run from `backend/`:
 .venv/bin/ruff check --select F,E9 app tests ../scripts
 ```
 
-The suite has **120 tests**, with no network access. Tests run in offline mode against a temporary `DATA_DIR` with `REFERENCE_DATE=2026-10-07` and zero processing delay (`tests/conftest.py`). The Anthropic client is replaced with fakes wherever the Claude path is exercised.
+The suite has **144 tests**, with no network access. Tests run in offline mode against a temporary `DATA_DIR` with `REFERENCE_DATE=2026-10-07` and zero processing delay (`tests/conftest.py`). The Anthropic and OpenAI clients are replaced with fakes wherever an AI path is exercised.
 
 | Suite | Covers |
 |---|---|
@@ -479,7 +482,8 @@ The suite has **120 tests**, with no network access. Tests run in offline mode a
 | `test_llm.py` | Each SDK exception → `LLMError`; refusal, truncation, empty, malformed and non-object replies; request shape and the refusal-fallback flag |
 | `test_planner_enrich.py` | Trip-purpose consolidation, meal vs attendees, category options, date chips, deferred policy questions, confirmation and upload prompts; inheritance and its blocks, derived fields, trip grouping, overrides |
 | `test_chat_agent.py` | `route()` phrasings, parsing helpers, every answer kind, status/submit/frozen replies, the Claude tool loop (errors, rename, unknown tool) and its fallback on `LLMError` |
+| `test_openai.py` | Provider selection for every mode and key combination, the Responses API request shape, refusal / truncation / malformed replies, SDK errors → `LLMError`, image and PDF blocks, fallback, the demo-receipt safeguard, and an uploaded photo read by (mocked) OpenAI through the API with chat staying rule-based |
 | `test_offline_parsing.py` | Amount parsing next to dates, quantities and identifiers; multi-field replies split into merchant, date, currency, amount and description; label echoes rejected; a scanned (image-only) PDF answered in one chat reply through the API; the scanned-PDF message; `.jfif` uploads |
 | `test_claims.py` | Status transitions, replace/dismiss documents, upload limits, group rename/override, edit validation, frozen submitted claims, history duplicates, persistence of `separate`, finance failure keeping the claim ready, mock API validation, payload preview |
 
-**Coverage:** **95%** of `app/` statements (2,333 statements, 111 missed). Before the dedicated unit-test pass it was 78%. Per module: `llm.py` 100%, `submission.py` 100%, `mock_finance.py` 100%, `chat_agent.py` 96%, `claim_manager.py` 95%, `document_interpreter.py` 91%.
+**Coverage:** **96%** of `app/` statements (2,403 statements, 108 missed). Before the dedicated unit-test pass it was 78%. Per module: `llm.py` 100%, `submission.py` 100%, `mock_finance.py` 100%, `chat_agent.py` 96%, `claim_manager.py` 95%, `document_interpreter.py` 92%, `openai_vision.py` 100%.

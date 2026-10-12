@@ -36,8 +36,8 @@ async def _read_uploads(files: list[UploadFile]) -> list[tuple[str, bytes]]:
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "ai": {"mode": "claude" if settings.ai_enabled else "offline",
-                               "model": settings.anthropic_model if settings.ai_enabled else None},
+    return {"ok": True, "ai": {"mode": settings.extraction_engine or "offline", "model": settings.extraction_model,
+                               "chat": "claude" if settings.ai_enabled else "rules"},
             "referenceDate": settings.today().isoformat()}
 
 

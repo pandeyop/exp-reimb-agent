@@ -23,6 +23,7 @@ from pypdf.errors import PdfReadError
 
 from ..settings import get_settings, load_policy
 from .fields import FIELD_DEFS
+from . import openai_vision
 from .llm import LLMError, structured_call
 
 log = logging.getLogger("expense_agent.interpreter")
@@ -212,6 +213,21 @@ def _claude_extract(insp: InspectedFile, data: bytes, filename: str) -> dict:
     return structured_call(EXTRACTION_SYSTEM, content, extraction_schema(), max_tokens=6000)
 
 
+def _openai_extract(insp: InspectedFile, data: bytes, filename: str) -> dict:
+    if insp.kind == "pdf":
+        block = {"type": "input_file", "filename": filename,
+                 "file_data": "data:application/pdf;base64," + base64.standard_b64encode(data).decode()}
+    else:
+        block = {"type": "input_image", "detail": "high",
+                 "image_url": f"data:{insp.media_type};base64," + base64.standard_b64encode(insp.image_bytes).decode()}
+    content = [
+        block,
+        {"type": "input_text", "text": f"Original filename: {filename}\nExtract the reimbursement-relevant data from this document."},
+    ]
+    return openai_vision.structured_call(EXTRACTION_SYSTEM, content, extraction_schema())
+
+
+
 # ------------------------------------------------------------------ offline extraction
 
 def _load_fixtures() -> dict:
@@ -299,22 +315,25 @@ def _empty_extraction(note: str) -> dict:
 def extract(data: bytes, sha256: str, filename: str, insp: InspectedFile) -> Extraction:
     settings = get_settings()
     notes: list[str] = []
-    if settings.ai_enabled:
-        for attempt in (1, 2):
-            try:
-                raw = _claude_extract(insp, data, filename)
-                return Extraction(raw=raw, mode="claude")
-            except LLMError as e:
-                log.warning("claude extraction failed (attempt %s): %s", attempt, e)
-                if attempt == 2 or "rejected" in str(e) or "declined" in str(e):
-                    notes.append(f"AI extraction failed ({e}); used the offline fallback.")
-                    break
-        if settings.extraction_mode == "claude":
-            return Extraction(raw=_empty_extraction(notes[-1] if notes else "AI extraction failed."), mode="none", notes=notes)
-
+    # The bundled demo receipts always replay their recorded extraction, even when an AI is enabled,
+    # so the public demo stays deterministic and never spends API credits.
     fixtures = _load_fixtures()
     if sha256 in fixtures:
         return Extraction(raw=fixtures[sha256]["extraction"], mode="replay", notes=notes)
+
+    engine = settings.extraction_engine
+    if engine:
+        for attempt in (1, 2):
+            try:
+                raw = (_openai_extract if engine == "openai" else _claude_extract)(insp, data, filename)
+                return Extraction(raw=raw, mode=engine)
+            except LLMError as e:
+                log.warning("%s extraction failed (attempt %s): %s", engine, attempt, e)
+                if attempt == 2 or "rejected" in str(e) or "declined" in str(e):
+                    notes.append(f"AI extraction failed ({e}); used the offline fallback.")
+                    break
+        if settings.extraction_mode in ("claude", "openai"):
+            return Extraction(raw=_empty_extraction(notes[-1] if notes else "AI extraction failed."), mode="none", notes=notes)
     if insp.kind == "pdf":
         parsed = _pdf_text_extract(insp.text)
         if parsed:
@@ -324,7 +343,7 @@ def extract(data: bytes, sha256: str, filename: str, insp: InspectedFile) -> Ext
             return Extraction(raw=_empty_extraction(msg), mode="none", notes=notes)
     msg = (
         "I couldn't read this document automatically"
-        + (" (offline mode has no OCR for unknown images)" if not settings.ai_enabled else "")
+        + (" (offline mode has no OCR for unknown images)" if not engine else "")
         + ". Please enter the key details or upload a clearer copy."
     )
     return Extraction(raw=_empty_extraction(msg), mode="none", notes=notes)

@@ -32,7 +32,7 @@ Do not set a start command. The Dockerfile's `CMD` already starts uvicorn on Ren
 
 | Variable | Value | Notes |
 |---|---|---|
-| `EXTRACTION_MODE` | `offline` | Default in both the image and the Blueprint. The public demo replays the recorded extractions for the 12 bundled receipts and never calls the Anthropic API. |
+| `EXTRACTION_MODE` | `offline` | Default in both the image and the Blueprint. The public demo replays the recorded extractions for the 12 bundled receipts and never calls an AI API. |
 | `DATA_DIR` | `/tmp/expense-agent` | SQLite database and uploads. Writable but **ephemeral** on the free tier. |
 | `REFERENCE_DATE` | `2026-10-07` | Pins "today" for the 60-day and future-date rules, so the September 2026 demo receipts behave identically on any day. Remove it to use the real date. |
 | `OFFLINE_PROCESSING_DELAY` | `0.9` | Seconds of simulated processing per document, so viewers see the pipeline run. |
@@ -46,7 +46,16 @@ Do not set a start command. The Dockerfile's `CMD` already starts uvicorn on Ren
 3. Optionally set `ANTHROPIC_MODEL` (default `claude-opus-5-5`) and `ANTHROPIC_EFFORT` (default `low`).
 4. **Save, rebuild and deploy.** `GET /api/health` should now report `"mode": "claude"`.
 
-The Blueprint deliberately does not declare `ANTHROPIC_API_KEY`. Render prompts for every secret declared with `sync: false` when a Blueprint is created, and the public demo needs no key.
+**Optional: OpenAI photo and PDF reading.** This lets the hosted app read real receipt photos and scanned PDFs with an OpenAI key. It consumes your OpenAI credits, and anyone with the URL can trigger it, so set a monthly spend limit on the key (OpenAI dashboard → Limits) before enabling it.
+
+1. Service → **Environment** → **Add Environment Variable**: key `OPENAI_API_KEY`, value = your key (a server-side secret, as above).
+2. Change `EXTRACTION_MODE` to `auto` (OpenAI is used when no Anthropic key is present) or `openai`.
+3. Optionally set `OPENAI_MODEL` (default `gpt-5.4-mini`, a vision-capable model).
+4. **Save, rebuild and deploy.** `GET /api/health` should report `"mode": "openai"` and `"chat": "rules"`.
+
+OpenAI is used only to read documents. Free-text chat stays on the deterministic interpreter (Claude tool use needs an Anthropic key). In every mode, the 12 bundled demo receipts replay their recorded extractions and never call an API. The demo therefore stays at 8/2/1/1 and costs nothing; only new uploads are sent to the AI.
+
+The Blueprint deliberately does not declare `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`. Render prompts for every secret declared with `sync: false` when a Blueprint is created, and the public demo needs no key.
 
 ## 3. Verify
 
