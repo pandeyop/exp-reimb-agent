@@ -339,9 +339,41 @@ def _category_from_text(low: str, policy: dict) -> str | None:
     return None
 
 
+_CURRENCY = r"(?:₹|\brs\b\.?|\binr\b)"
+_AMOUNT = r"\d[\d,]*(?:\.\d{1,2})?"
+_MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?"
+# Number-bearing phrases that are never the amount: dates, times, ordinals, quantities, percentages.
+_NOT_MONEY = [
+    r"\b\d{4}-\d{1,2}-\d{1,2}\b",                                        # 2026-09-23
+    r"\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b",                           # 23/09, 23-09-2026
+    r"\b\d{1,2}\.\d{1,2}\.\d{2,4}\b",                                    # 23.09.2026
+    rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s*(?:of\s+)?{_MONTH}(?:,?\s*\d{{4}})?",  # 23 Sep (2026)
+    rf"\b{_MONTH}\s+\d{{1,2}}(?:st|nd|rd|th)?\b(?:,?\s*\d{{4}})?",          # Sep 23rd, 2026
+    r"\b\d{1,2}(?:st|nd|rd|th)\b",                                       # the 23rd
+    r"\b\d{1,2}:\d{2}\b",                                                # 10:42
+    r"\b\d+(?:\.\d+)?\s*%",                                              # 18%
+    r"\b\d+\s*(?:x|pcs?|people|persons?|pax|guests?|covers?|nights?|days?|hours?|hrs?|km|kms|items?|units?)\b",
+]
+
+
 def parse_money(text: str) -> float | None:
-    m = re.search(r"(?:₹|rs\.?|inr)?\s*(\d[\d,]*(?:\.\d{1,2})?)", text or "", re.I)
-    return coerce("total", m.group(1)) if m else None
+    """The amount in a free-text reply, or None when it isn't clear which number is the amount.
+
+    A number next to a currency marker (₹, Rs, INR) wins. Otherwise numbers that belong to dates,
+    times, ordinals, quantities, percentages or identifiers (INV-778) are ignored; exactly one
+    remaining number is the amount, and several are ambiguous, so the agent asks again.
+    """
+    t = re.sub(r"(?<=\d),(?=\d{2,3}\b)", "", text or "")  # 1,234.50 / 1,23,456 -> plain digits
+    for pattern in _NOT_MONEY:  # first, so "2026-09-23 Rs. 1250" can't read the 23 as "23 Rs"
+        t = re.sub(pattern, " ", t, flags=re.I)
+    marked = {coerce("total", m) for m in
+              re.findall(rf"{_CURRENCY}\s*({_AMOUNT})", t, re.I) + re.findall(rf"({_AMOUNT})\s*{_CURRENCY}", t, re.I)}
+    marked.discard(None)
+    if marked:
+        return marked.pop() if len(marked) == 1 else None
+    candidates = {coerce("total", m) for m in re.findall(rf"(?<![\w.-]){_AMOUNT}(?![\w-])", t)}
+    candidates.discard(None)
+    return candidates.pop() if len(candidates) == 1 else None
 
 
 def _date_context(claim_id: str, e: dict) -> dict:
